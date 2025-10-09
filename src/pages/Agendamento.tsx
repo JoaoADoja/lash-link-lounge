@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const services = [
   { value: "design", label: "Design de Sobrancelhas - R$ 70", duration: "40 min" },
@@ -46,7 +47,7 @@ const Agendamento = () => {
     observations: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!date || !formData.service || !formData.time) {
@@ -57,12 +58,40 @@ const Agendamento = () => {
     const selectedService = services.find(s => s.value === formData.service);
     const dateStr = date.toLocaleDateString('pt-BR');
     
+    // Criar evento no Google Calendar
+    try {
+      toast.loading("Criando evento no calendário...");
+      
+      const { data, error } = await supabase.functions.invoke('create-calendar-event', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          service: selectedService?.label,
+          date: dateStr,
+          time: formData.time,
+          observations: formData.observations
+        }
+      });
+
+      if (error) {
+        console.error('Error creating calendar event:', error);
+        toast.error("Erro ao criar evento no calendário");
+      } else {
+        toast.success("Evento criado no Google Calendar!");
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Erro ao processar agendamento");
+    }
+    
     // Criar mensagem para WhatsApp
     const message = `*Novo Agendamento*%0A%0ANome: ${formData.name}%0AEmail: ${formData.email}%0ATelefone: ${formData.phone}%0A%0AServiço: ${selectedService?.label}%0ADuração: ${selectedService?.duration}%0AData: ${dateStr}%0AHorário: ${formData.time}%0A%0AObservações: ${formData.observations || 'Nenhuma'}`;
     
     window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
     
-    toast.success("Redirecionando para finalizar agendamento...");
+    toast.dismiss();
+    toast.success("Agendamento finalizado!");
     
     // Limpar formulário
     setFormData({
