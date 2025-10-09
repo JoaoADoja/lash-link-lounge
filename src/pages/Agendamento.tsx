@@ -76,9 +76,9 @@ const Agendamento = () => {
     setDate(undefined);
   };
 
-  // Desabilitar domingos, segundas e sextas
+  // Desabilitar domingos e segundas (terça a sábado)
   const disabledDays = [
-    { dayOfWeek: [0, 1, 5, 6] } // 0=Dom, 1=Seg, 5=Sex, 6=Sáb
+    { dayOfWeek: [0, 1] } // 0=Dom, 1=Seg
   ];
 
   return (
@@ -87,29 +87,36 @@ const Agendamento = () => {
       
       <main className="container mx-auto px-4 pt-24 pb-12">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
             Agende seu Horário
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Escolha o serviço, data e horário de sua preferência
           </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <CalendarIcon className="h-4 w-4" />
+            <span>Agendamento sincronizado com Google Calendar</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Formulário */}
-          <Card className="lg:col-span-2 shadow-soft border-border">
-            <CardHeader>
-              <CardTitle>Dados do Agendamento</CardTitle>
-              <CardDescription>
-                Preencha as informações abaixo para agendar seu serviço
+          <Card className="lg:col-span-2 shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-2xl">Dados do Agendamento</CardTitle>
+              <CardDescription className="text-base">
+                Preencha as informações abaixo para agendar seu serviço. Você receberá um convite no Google Calendar.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Dados Pessoais */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Seus Dados</h3>
+                <div className="space-y-4 p-6 rounded-lg bg-gradient-subtle border border-border/50">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <div className="h-8 w-1 bg-gradient-rose-gold rounded-full" />
+                    Seus Dados
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name">Nome Completo *</Label>
@@ -147,8 +154,11 @@ const Agendamento = () => {
                 </div>
 
                 {/* Serviço */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Serviço Desejado</h3>
+                <div className="space-y-4 p-6 rounded-lg bg-gradient-subtle border border-border/50">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <div className="h-8 w-1 bg-gradient-rose-gold rounded-full" />
+                    Serviço Desejado
+                  </h3>
                   <div>
                     <Label htmlFor="service">Escolha o Serviço *</Label>
                     <Select
@@ -171,8 +181,11 @@ const Agendamento = () => {
                 </div>
 
                 {/* Data e Horário */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Data e Horário</h3>
+                <div className="space-y-4 p-6 rounded-lg bg-gradient-subtle border border-border/50">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <div className="h-8 w-1 bg-gradient-rose-gold rounded-full" />
+                    Data e Horário
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Data *</Label>
@@ -223,7 +236,8 @@ const Agendamento = () => {
                   />
                 </div>
 
-                <Button type="submit" variant="hero" size="lg" className="w-full">
+                <Button type="submit" variant="hero" size="lg" className="w-full group">
+                  <CalendarIcon className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Finalizar Agendamento
                 </Button>
               </form>
@@ -232,7 +246,7 @@ const Agendamento = () => {
 
           {/* Informações Importantes */}
           <div className="space-y-6">
-            <Card className="shadow-soft border-border">
+            <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CalendarIcon className="h-5 w-5 text-primary" />
@@ -240,12 +254,12 @@ const Agendamento = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p className="font-medium">Terça a Quinta</p>
+                <p className="font-medium">Terça a Sábado</p>
                 <p className="text-muted-foreground">09h30 às 19h00</p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft border-border">
+            <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" />
@@ -262,7 +276,7 @@ const Agendamento = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft border-2 border-primary/20">
+            <Card className="shadow-elegant border-2 border-primary/20 bg-card/50 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertCircle className="h-5 w-5 text-primary" />
