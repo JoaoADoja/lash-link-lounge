@@ -8,6 +8,9 @@ import Servicos from "./pages/Servicos";
 import Portfolio from "./pages/Portfolio";
 import Contato from "./pages/Contato";
 import Agendamento from "./pages/Agendamento";
+import Auth from "./pages/Auth";
+import MeusAgendamentos from "./pages/MeusAgendamentos";
+import AdminAgendamentos from "./pages/AdminAgendamentos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +27,9 @@ const App = () => (
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/contato" element={<Contato />} />
           <Route path="/agendamento" element={<Agendamento />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/meus-agendamentos" element={<MeusAgendamentos />} />
+          <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

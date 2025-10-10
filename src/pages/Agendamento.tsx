@@ -11,9 +11,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 const services = [
   { value: "design", label: "Design de Sobrancelhas - R$ 70", duration: "40 min" },
@@ -39,7 +41,13 @@ const availableHours = [
   "15:30", "16:00", "16:30", "17:00", "17:30"
 ];
 
+const nameSchema = z.string().trim().min(2, "Nome deve ter no mínimo 2 caracteres").max(100);
+const emailSchema = z.string().email("E-mail inválido").max(255);
+const phoneSchema = z.string().trim().min(10, "Telefone inválido").max(20);
+
 const Agendamento = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [formData, setFormData] = useState({
     name: "",
@@ -50,22 +58,101 @@ const Agendamento = () => {
     observations: "",
   });
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadUserProfile(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadUserProfile(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, phone")
+      .eq("id", userId)
+      .single();
+
+    if (data) {
+      setFormData(prev => ({
+        ...prev,
+        name: data.full_name || "",
+        phone: data.phone || ""
+      }));
+    }
+
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser?.email) {
+      setFormData(prev => ({
+        ...prev,
+        email: authUser.email || ""
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast.error("Você precisa estar logado para fazer um agendamento");
+      navigate("/auth");
+      return;
+    }
+
     if (!date || !formData.service || !formData.time) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
 
+    try {
+      nameSchema.parse(formData.name);
+      emailSchema.parse(formData.email);
+      phoneSchema.parse(formData.phone);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        toast.error(err.errors[0].message);
+        return;
+      }
+    }
+
     const selectedService = services.find(s => s.value === formData.service);
     const dateStr = date.toLocaleDateString('pt-BR');
     
-    // Criar evento no Google Calendar
     try {
-      toast.loading("Criando evento no calendário...");
+      toast.loading("Salvando agendamento...");
+
+      const { error: dbError } = await supabase
+        .from("appointments")
+        .insert({
+          user_id: user.id,
+          client_name: formData.name,
+          client_email: formData.email,
+          client_phone: formData.phone,
+          service: selectedService?.label || formData.service,
+          appointment_date: date.toISOString().split('T')[0],
+          appointment_time: formData.time,
+          observations: formData.observations || null,
+          status: "pending"
+        });
+
+      if (dbError) {
+        console.error('Error saving appointment:', dbError);
+        toast.dismiss();
+        toast.error("Erro ao salvar agendamento");
+        return;
+      }
       
-      const { data, error } = await supabase.functions.invoke('create-calendar-event', {
+      const { error: calendarError } = await supabase.functions.invoke('create-calendar-event', {
         body: {
           name: formData.name,
           email: formData.email,
@@ -77,35 +164,23 @@ const Agendamento = () => {
         }
       });
 
-      if (error) {
-        console.error('Error creating calendar event:', error);
-        toast.error("Erro ao criar evento no calendário");
-      } else {
-        toast.success("Evento criado no Google Calendar!");
+      if (calendarError) {
+        console.error('Error creating calendar event:', calendarError);
       }
+      
+      const message = `*Novo Agendamento*%0A%0ANome: ${encodeURIComponent(formData.name)}%0AEmail: ${encodeURIComponent(formData.email)}%0ATelefone: ${encodeURIComponent(formData.phone)}%0A%0AServiço: ${encodeURIComponent(selectedService?.label || '')}%0ADuração: ${encodeURIComponent(selectedService?.duration || '')}%0AData: ${encodeURIComponent(dateStr)}%0AHorário: ${formData.time}%0A%0AObservações: ${encodeURIComponent(formData.observations || 'Nenhuma')}`;
+      
+      window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
+      
+      toast.dismiss();
+      toast.success("Agendamento realizado com sucesso!");
+      
+      navigate("/meus-agendamentos");
     } catch (error) {
       console.error('Error:', error);
+      toast.dismiss();
       toast.error("Erro ao processar agendamento");
     }
-    
-    // Criar mensagem para WhatsApp
-    const message = `*Novo Agendamento*%0A%0ANome: ${formData.name}%0AEmail: ${formData.email}%0ATelefone: ${formData.phone}%0A%0AServiço: ${selectedService?.label}%0ADuração: ${selectedService?.duration}%0AData: ${dateStr}%0AHorário: ${formData.time}%0A%0AObservações: ${formData.observations || 'Nenhuma'}`;
-    
-    window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
-    
-    toast.dismiss();
-    toast.success("Agendamento finalizado!");
-    
-    // Limpar formulário
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      service: "",
-      time: "",
-      observations: "",
-    });
-    setDate(undefined);
   };
 
   // Desabilitar domingos e segundas (terça a sábado)

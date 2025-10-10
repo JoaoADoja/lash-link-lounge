@@ -1,11 +1,52 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Instagram, Phone } from "lucide-react";
+import { Menu, X, Instagram, Phone, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isProfessional, setIsProfessional] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkIfProfessional(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkIfProfessional(session.user.id);
+      } else {
+        setIsProfessional(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkIfProfessional = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "professional")
+      .maybeSingle();
+    
+    setIsProfessional(!!data);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -62,11 +103,40 @@ const Navbar = () => {
                   WhatsApp
                 </Button>
               </a>
-              <Link to="/agendamento">
-                <Button variant="default" size="sm">
-                  Agendar
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  {isProfessional && (
+                    <Link to="/admin/agendamentos">
+                      <Button variant="outline" size="sm">
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
+                  <Link to="/meus-agendamentos">
+                    <Button variant="outline" size="sm">
+                      <User className="h-4 w-4 mr-1" />
+                      Meus Agendamentos
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="sm" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/agendamento">
+                    <Button variant="default" size="sm">
+                      Agendar
+                    </Button>
+                  </Link>
+                  <Link to="/auth">
+                    <Button variant="outline" size="sm">
+                      <User className="h-4 w-4 mr-1" />
+                      Entrar
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -107,11 +177,41 @@ const Navbar = () => {
                   WhatsApp
                 </Button>
               </a>
-              <Link to="/agendamento" onClick={() => setIsOpen(false)}>
-                <Button variant="default" size="sm" className="w-full">
-                  Agendar
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  {isProfessional && (
+                    <Link to="/admin/agendamentos" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
+                  <Link to="/meus-agendamentos" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <User className="h-4 w-4 mr-1" />
+                      Meus Agendamentos
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => { handleLogout(); setIsOpen(false); }}>
+                    <LogOut className="h-4 w-4 mr-1" />
+                    Sair
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/agendamento" onClick={() => setIsOpen(false)}>
+                    <Button variant="default" size="sm" className="w-full">
+                      Agendar
+                    </Button>
+                  </Link>
+                  <Link to="/auth" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <User className="h-4 w-4 mr-1" />
+                      Entrar
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
