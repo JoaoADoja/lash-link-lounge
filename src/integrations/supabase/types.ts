@@ -24,6 +24,7 @@ export type Database = {
           created_at: string
           id: string
           observations: string | null
+          professional_id: string | null
           service: string
           status: string
           updated_at: string
@@ -38,6 +39,7 @@ export type Database = {
           created_at?: string
           id?: string
           observations?: string | null
+          professional_id?: string | null
           service: string
           status?: string
           updated_at?: string
@@ -52,6 +54,7 @@ export type Database = {
           created_at?: string
           id?: string
           observations?: string | null
+          professional_id?: string | null
           service?: string
           status?: string
           updated_at?: string

@@ -131,10 +131,26 @@ const Agendamento = () => {
     try {
       toast.loading("Salvando agendamento...");
 
+      // Get the first professional to assign this appointment
+      const { data: professionalData, error: professionalError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "professional")
+        .limit(1)
+        .single();
+
+      if (professionalError || !professionalData) {
+        console.error('Error finding professional:', professionalError);
+        toast.dismiss();
+        toast.error("Erro: Nenhuma profissional disponível");
+        return;
+      }
+
       const { error: dbError } = await supabase
         .from("appointments")
         .insert({
           user_id: user.id,
+          professional_id: professionalData.user_id,
           client_name: formData.name,
           client_email: formData.email,
           client_phone: formData.phone,
