@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Calendar, Clock, Loader2, LogOut, User, Phone, Mail } from "lucide-react";
+import { Calendar, Clock, Loader2, LogOut, User, Phone, Mail, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -133,10 +133,16 @@ const AdminAgendamentos = () => {
             <h1 className="text-4xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent">
               Gestão de Agendamentos
             </h1>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate("/admin-settings")}>
+                <Settings className="mr-2 h-4 w-4" />
+                Configurações
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            </div>
           </div>
 
           {appointments.length === 0 ? (

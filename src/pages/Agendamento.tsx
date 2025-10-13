@@ -17,23 +17,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
-const services = [
-  { value: "design", label: "Design de Sobrancelhas - R$ 70", duration: "40 min" },
-  { value: "design-henna", label: "Design com Henna - R$ 80", duration: "1h" },
-  { value: "depilacao", label: "Depilação na Linha - R$ 40+", duration: "30 min" },
-  { value: "lash-lifting", label: "Lash Lifting - R$ 160", duration: "1h10min" },
-  { value: "brown-lamination", label: "Brown Lamination - R$ 160", duration: "1h10min" },
-  { value: "micro-blading", label: "Micropigmentação Blading - R$ 400", duration: "2h" },
-  { value: "micro-shadow", label: "Micropigmentação Shadow - R$ 450", duration: "2h" },
-  { value: "limpeza", label: "Limpeza de Pele - R$ 120", duration: "1h20min" },
-  { value: "extensao-brasileiro", label: "Extensão Volume Brasileiro - R$ 140", duration: "2h30min" },
-  { value: "extensao-egipcio", label: "Extensão Volume Egípcio - R$ 160", duration: "2h30min" },
-  { value: "extensao-medio", label: "Extensão Volume Médio - R$ 160", duration: "2h30min" },
-  { value: "combo1", label: "Combo 1: Design + Buço - R$ 80", duration: "1h" },
-  { value: "combo2", label: "Combo 2: Design com Henna + Buço - R$ 100", duration: "1h20min" },
-  { value: "combo3", label: "Combo 3: Design + Lash Lifting - R$ 180", duration: "2h" },
-  { value: "combo4", label: "Combo 4: Lash Lifting + Brown Lamination - R$ 280", duration: "2h" },
-];
+interface Service {
+  id: string;
+  name: string;
+  price: number;
+  duration: string;
+  is_combo: boolean;
+}
 
 const availableHours = [
   "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -49,6 +39,8 @@ const Agendamento = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -59,6 +51,8 @@ const Agendamento = () => {
   });
 
   useEffect(() => {
+    loadServices();
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -75,6 +69,24 @@ const Agendamento = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("services")
+        .select("id, name, price, duration, is_combo")
+        .eq("is_active", true)
+        .order("display_order");
+      
+      if (error) throw error;
+      setServices(data || []);
+    } catch (error) {
+      console.error("Error loading services:", error);
+      toast.error("Erro ao carregar serviços");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadUserProfile = async (userId: string) => {
     const { data } = await supabase
@@ -125,7 +137,7 @@ const Agendamento = () => {
       }
     }
 
-    const selectedService = services.find(s => s.value === formData.service);
+    const selectedService = services.find(s => s.id === formData.service);
     const dateStr = date.toLocaleDateString('pt-BR');
     
     try {
@@ -154,7 +166,7 @@ const Agendamento = () => {
           client_name: formData.name,
           client_email: formData.email,
           client_phone: formData.phone,
-          service: selectedService?.label || formData.service,
+          service: selectedService?.name || formData.service,
           appointment_date: date.toISOString().split('T')[0],
           appointment_time: formData.time,
           observations: formData.observations || null,
@@ -173,7 +185,7 @@ const Agendamento = () => {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          service: selectedService?.label,
+          service: selectedService?.name,
           date: dateStr,
           time: formData.time,
           observations: formData.observations
@@ -184,7 +196,7 @@ const Agendamento = () => {
         console.error('Error creating calendar event:', calendarError);
       }
       
-      const message = `*Novo Agendamento*%0A%0ANome: ${encodeURIComponent(formData.name)}%0AEmail: ${encodeURIComponent(formData.email)}%0ATelefone: ${encodeURIComponent(formData.phone)}%0A%0AServiço: ${encodeURIComponent(selectedService?.label || '')}%0ADuração: ${encodeURIComponent(selectedService?.duration || '')}%0AData: ${encodeURIComponent(dateStr)}%0AHorário: ${formData.time}%0A%0AObservações: ${encodeURIComponent(formData.observations || 'Nenhuma')}`;
+      const message = `*Novo Agendamento*%0A%0ANome: ${encodeURIComponent(formData.name)}%0AEmail: ${encodeURIComponent(formData.email)}%0ATelefone: ${encodeURIComponent(formData.phone)}%0A%0AServiço: ${encodeURIComponent(selectedService?.name || '')}%0ADuração: ${encodeURIComponent(selectedService?.duration || '')}%0AData: ${encodeURIComponent(dateStr)}%0AHorário: ${formData.time}%0A%0AObservações: ${encodeURIComponent(formData.observations || 'Nenhuma')}`;
       
       window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
       
@@ -203,6 +215,14 @@ const Agendamento = () => {
   const disabledDays = [
     { dayOfWeek: [0, 1] } // 0=Dom, 1=Seg
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -291,14 +311,14 @@ const Agendamento = () => {
                     >
                       <SelectTrigger id="service">
                         <SelectValue placeholder="Selecione um serviço" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {services.map((service) => (
-                          <SelectItem key={service.value} value={service.value}>
-                            {service.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {services.map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.name} - R$ {service.price}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                     </Select>
                   </div>
                 </div>

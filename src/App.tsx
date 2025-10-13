@@ -11,6 +11,7 @@ import Agendamento from "./pages/Agendamento";
 import Auth from "./pages/Auth";
 import MeusAgendamentos from "./pages/MeusAgendamentos";
 import AdminAgendamentos from "./pages/AdminAgendamentos";
+import AdminSettings from "./pages/AdminSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,8 @@ const App = () => (
           <Route path="/agendamento" element={<Agendamento />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/meus-agendamentos" element={<MeusAgendamentos />} />
-          <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
+          <Route path="/admin-agendamentos" element={<AdminAgendamentos />} />
+          <Route path="/admin-settings" element={<AdminSettings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
