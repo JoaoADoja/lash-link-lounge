@@ -106,7 +106,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   {isProfessional && (
-                    <Link to="/admin/agendamentos">
+                    <Link to="/admin-agendamentos">
                       <Button variant="outline" size="sm">
                         Admin
                       </Button>
@@ -180,7 +180,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   {isProfessional && (
-                    <Link to="/admin/agendamentos" onClick={() => setIsOpen(false)}>
+                    <Link to="/admin-agendamentos" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" size="sm" className="w-full">
                         Admin
                       </Button>
