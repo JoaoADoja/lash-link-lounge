@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Save, Trash2, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface Service {
@@ -174,32 +175,41 @@ const AdminSettings = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={() => navigate("/admin-agendamentos")}>
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent mb-2">
+                Painel Administrativo
+              </h1>
+              <p className="text-muted-foreground">Gerencie serviços, preços e avisos importantes</p>
+            </div>
+            <Button variant="outline" size="lg" onClick={() => navigate("/admin-agendamentos")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
+              Voltar para Agendamentos
             </Button>
-            <h1 className="text-4xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent">
-              Configurações Administrativas
-            </h1>
           </div>
 
-          <Tabs defaultValue="services" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="services">Serviços e Combos</TabsTrigger>
-              <TabsTrigger value="announcements">Avisos para Clientes</TabsTrigger>
+          <Tabs defaultValue="services" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-2 h-14 bg-card/50 backdrop-blur">
+              <TabsTrigger value="services" className="text-base font-medium">
+                💅 Serviços e Combos
+              </TabsTrigger>
+              <TabsTrigger value="announcements" className="text-base font-medium">
+                📢 Avisos para Clientes
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="services" className="space-y-4">
-              <Card className="shadow-elegant border-primary/10">
-                <CardHeader>
-                  <div className="flex justify-between items-center">
+            <TabsContent value="services" className="space-y-6">
+              <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+                <CardHeader className="border-b border-border/50">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                      <CardTitle>Gerenciar Serviços</CardTitle>
-                      <CardDescription>Edite valores, duração e disponibilidade dos serviços</CardDescription>
+                      <CardTitle className="text-2xl">Gerenciar Serviços</CardTitle>
+                      <CardDescription className="text-base mt-1">
+                        Edite valores, duração e disponibilidade dos serviços
+                      </CardDescription>
                     </div>
-                    <Button onClick={() => setEditingService({
+                    <Button size="lg" className="shadow-soft" onClick={() => setEditingService({
                       id: '',
                       name: '',
                       price: 0,
@@ -214,26 +224,38 @@ const AdminSettings = () => {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 pt-6">
                   {services.map((service) => (
-                    <Card key={service.id} className="p-4">
+                    <Card key={service.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                         <div className="md:col-span-2">
-                          <p className="font-semibold">{service.name}</p>
-                          <p className="text-sm text-muted-foreground">{service.category}</p>
+                          <p className="font-semibold text-lg mb-1">{service.name}</p>
+                          <div className="flex gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {service.category}
+                            </Badge>
+                            {service.is_combo && (
+                              <Badge variant="secondary" className="text-xs">
+                                COMBO
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-primary">R$ {service.price}</p>
-                          <p className="text-sm text-muted-foreground">{service.duration}</p>
+                          <p className="text-xl font-bold text-primary">R$ {service.price.toFixed(2)}</p>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {service.duration}
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={service.is_active}
                             onCheckedChange={(checked) => saveService({ id: service.id, is_active: checked })}
                           />
-                          <span className="text-sm">{service.is_active ? 'Ativo' : 'Inativo'}</span>
+                          <span className="text-sm font-medium">{service.is_active ? '✓ Ativo' : '○ Inativo'}</span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 justify-end">
                           <Button variant="outline" size="sm" onClick={() => setEditingService(service)}>
                             Editar
                           </Button>
@@ -244,13 +266,22 @@ const AdminSettings = () => {
                       </div>
                     </Card>
                   ))}
+                  {services.length === 0 && (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <p className="text-lg">Nenhum serviço cadastrado</p>
+                      <p className="text-sm mt-1">Clique em "Novo Serviço" para começar</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
               {editingService && (
-                <Card className="shadow-elegant border-primary/10">
-                  <CardHeader>
-                    <CardTitle>{editingService.id ? 'Editar Serviço' : 'Novo Serviço'}</CardTitle>
+                <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+                  <CardHeader className="border-b border-border/50">
+                    <CardTitle className="text-2xl">
+                      {editingService.id ? '✏️ Editar Serviço' : '➕ Novo Serviço'}
+                    </CardTitle>
+                    <CardDescription>Preencha todos os campos obrigatórios (*)</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -330,15 +361,17 @@ const AdminSettings = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="announcements" className="space-y-4">
-              <Card className="shadow-elegant border-primary/10">
-                <CardHeader>
-                  <div className="flex justify-between items-center">
+            <TabsContent value="announcements" className="space-y-6">
+              <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+                <CardHeader className="border-b border-border/50">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                      <CardTitle>Avisos para Clientes</CardTitle>
-                      <CardDescription>Crie avisos importantes que aparecerão na página inicial</CardDescription>
+                      <CardTitle className="text-2xl">Avisos para Clientes</CardTitle>
+                      <CardDescription className="text-base mt-1">
+                        Crie avisos importantes que aparecerão na página inicial
+                      </CardDescription>
                     </div>
-                    <Button onClick={() => setEditingAnnouncement({
+                    <Button size="lg" className="shadow-soft" onClick={() => setEditingAnnouncement({
                       id: '',
                       title: '',
                       content: '',
@@ -349,21 +382,26 @@ const AdminSettings = () => {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 pt-6">
                   {announcements.map((announcement) => (
-                    <Card key={announcement.id} className="p-4">
-                      <div className="flex justify-between items-start gap-4">
+                    <Card key={announcement.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
+                      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{announcement.title}</h3>
-                          <p className="text-muted-foreground mt-2">{announcement.content}</p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-xl">{announcement.title}</h3>
+                            {announcement.is_active && (
+                              <Badge variant="default" className="text-xs">ATIVO</Badge>
+                            )}
+                          </div>
+                          <p className="text-muted-foreground leading-relaxed">{announcement.content}</p>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={announcement.is_active}
                               onCheckedChange={(checked) => saveAnnouncement({ id: announcement.id, is_active: checked })}
                             />
-                            <span className="text-sm">{announcement.is_active ? 'Ativo' : 'Inativo'}</span>
+                            <span className="text-sm font-medium">{announcement.is_active ? '✓ Ativo' : '○ Inativo'}</span>
                           </div>
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" onClick={() => setEditingAnnouncement(announcement)}>
@@ -378,15 +416,21 @@ const AdminSettings = () => {
                     </Card>
                   ))}
                   {announcements.length === 0 && (
-                    <p className="text-center text-muted-foreground py-8">Nenhum aviso cadastrado</p>
+                    <div className="text-center py-12 text-muted-foreground">
+                      <p className="text-lg">Nenhum aviso cadastrado</p>
+                      <p className="text-sm mt-1">Clique em "Novo Aviso" para começar</p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
 
               {editingAnnouncement && (
-                <Card className="shadow-elegant border-primary/10">
-                  <CardHeader>
-                    <CardTitle>{editingAnnouncement.id ? 'Editar Aviso' : 'Novo Aviso'}</CardTitle>
+                <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+                  <CardHeader className="border-b border-border/50">
+                    <CardTitle className="text-2xl">
+                      {editingAnnouncement.id ? '✏️ Editar Aviso' : '➕ Novo Aviso'}
+                    </CardTitle>
+                    <CardDescription>Preencha todos os campos obrigatórios (*)</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>

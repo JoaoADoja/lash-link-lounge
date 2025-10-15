@@ -129,16 +129,21 @@ const AdminAgendamentos = () => {
       
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-6xl mx-auto space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-4xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent">
-              Gestão de Agendamentos
-            </h1>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => navigate("/admin-settings")}>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent mb-2">
+                Gestão de Agendamentos
+              </h1>
+              <p className="text-muted-foreground">
+                {appointments.length} {appointments.length === 1 ? 'agendamento encontrado' : 'agendamentos encontrados'}
+              </p>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" size="lg" onClick={() => navigate("/admin-settings")}>
                 <Settings className="mr-2 h-4 w-4" />
                 Configurações
               </Button>
-              <Button variant="outline" onClick={handleLogout}>
+              <Button variant="outline" size="lg" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sair
               </Button>
@@ -146,60 +151,63 @@ const AdminAgendamentos = () => {
           </div>
 
           {appointments.length === 0 ? (
-            <Card className="shadow-elegant border-primary/10">
-              <CardContent className="py-12 text-center">
-                <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Nenhum agendamento encontrado</p>
+            <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+              <CardContent className="py-16 text-center">
+                <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="text-xl font-semibold mb-2">Nenhum agendamento encontrado</p>
+                <p className="text-muted-foreground">Os novos agendamentos aparecerão aqui</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4">
               {appointments.map((appointment) => (
-                <Card key={appointment.id} className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                  <CardHeader>
-                    <div className="flex justify-between items-start gap-4">
+                <Card key={appointment.id} className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur hover:shadow-glow transition-shadow">
+                  <CardHeader className="pb-4">
+                    <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
                       <div className="flex-1">
-                        <CardTitle className="text-xl mb-2">{appointment.service}</CardTitle>
-                        <CardDescription className="space-y-2">
-                          <div className="flex items-center gap-4 flex-wrap">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {format(new Date(appointment.appointment_date), "dd/MM/yyyy", { locale: ptBR })}
+                        <CardTitle className="text-2xl mb-3 flex items-center gap-2">
+                          {appointment.service}
+                          {getStatusBadge(appointment.status)}
+                        </CardTitle>
+                        <CardDescription className="space-y-3">
+                          <div className="flex items-center gap-6 flex-wrap bg-muted/30 p-3 rounded-lg">
+                            <span className="flex items-center gap-2 text-base font-medium">
+                              <Calendar className="h-5 w-5 text-primary" />
+                              {format(new Date(appointment.appointment_date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
                             </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
+                            <span className="flex items-center gap-2 text-base font-medium">
+                              <Clock className="h-5 w-5 text-primary" />
                               {appointment.appointment_time}
                             </span>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                            <span className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {appointment.client_name}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {appointment.client_phone}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              {appointment.client_email}
-                            </span>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="flex items-center gap-2 bg-muted/30 p-2 rounded">
+                              <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm truncate">{appointment.client_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-muted/30 p-2 rounded">
+                              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm">{appointment.client_phone}</span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-muted/30 p-2 rounded">
+                              <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm truncate">{appointment.client_email}</span>
+                            </div>
                           </div>
                         </CardDescription>
                       </div>
-                      <div className="flex flex-col gap-2 items-end min-w-[160px]">
-                        {getStatusBadge(appointment.status)}
+                      <div className="flex flex-col gap-3 min-w-[200px]">
                         <Select
                           value={appointment.status}
                           onValueChange={(value) => updateStatus(appointment.id, value)}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full h-11 font-medium">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="pending">Pendente</SelectItem>
-                            <SelectItem value="confirmed">Confirmado</SelectItem>
-                            <SelectItem value="cancelled">Cancelado</SelectItem>
+                            <SelectItem value="pending">⏳ Pendente</SelectItem>
+                            <SelectItem value="confirmed">✓ Confirmado</SelectItem>
+                            <SelectItem value="cancelled">✗ Cancelado</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
