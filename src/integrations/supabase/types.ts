@@ -89,6 +89,44 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_slots: {
+        Row: {
+          blocked_date: string
+          blocked_time: string
+          created_at: string
+          id: string
+          professional_id: string
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          blocked_date: string
+          blocked_time: string
+          created_at?: string
+          id?: string
+          professional_id: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blocked_date?: string
+          blocked_time?: string
+          created_at?: string
+          id?: string
+          professional_id?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocked_slots_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

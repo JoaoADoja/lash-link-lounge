@@ -33,13 +33,26 @@ interface Announcement {
   is_active: boolean;
 }
 
+interface BlockedSlot {
+  id: string;
+  blocked_date: string;
+  blocked_time: string;
+  reason: string | null;
+}
+
 const AdminSettings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [newBlockedSlot, setNewBlockedSlot] = useState<Partial<BlockedSlot>>({
+    blocked_date: '',
+    blocked_time: '',
+    reason: ''
+  });
 
   useEffect(() => {
     checkProfessional();
@@ -71,16 +84,24 @@ const AdminSettings = () => {
 
   const loadData = async () => {
     try {
-      const [servicesRes, announcementsRes] = await Promise.all([
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const [servicesRes, announcementsRes, blockedSlotsRes] = await Promise.all([
         supabase.from("services").select("*").order("display_order"),
-        supabase.from("announcements").select("*").order("created_at", { ascending: false })
+        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
+        supabase.from("blocked_slots")
+          .select("*")
+          .eq("professional_id", session?.user?.id)
+          .order("blocked_date", { ascending: false })
       ]);
 
       if (servicesRes.error) throw servicesRes.error;
       if (announcementsRes.error) throw announcementsRes.error;
+      if (blockedSlotsRes.error) throw blockedSlotsRes.error;
 
       setServices(servicesRes.data || []);
       setAnnouncements(announcementsRes.data || []);
+      setBlockedSlots(blockedSlotsRes.data || []);
     } catch (error) {
       toast.error("Erro ao carregar dados");
     } finally {
@@ -162,6 +183,44 @@ const AdminSettings = () => {
     }
   };
 
+  const addBlockedSlot = async () => {
+    if (!newBlockedSlot.blocked_date || !newBlockedSlot.blocked_time) {
+      toast.error("Preencha data e horário");
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { error } = await supabase.from("blocked_slots").insert([{
+        professional_id: session?.user?.id,
+        blocked_date: newBlockedSlot.blocked_date,
+        blocked_time: newBlockedSlot.blocked_time,
+        reason: newBlockedSlot.reason || null
+      }]);
+
+      if (error) throw error;
+      
+      toast.success("Horário bloqueado com sucesso!");
+      setNewBlockedSlot({ blocked_date: '', blocked_time: '', reason: '' });
+      loadData();
+    } catch (error) {
+      toast.error("Erro ao bloquear horário");
+    }
+  };
+
+  const deleteBlockedSlot = async (id: string) => {
+    if (!confirm("Deseja desbloquear este horário?")) return;
+    try {
+      const { error } = await supabase.from("blocked_slots").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Horário desbloqueado!");
+      loadData();
+    } catch (error) {
+      toast.error("Erro ao desbloquear horário");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -190,12 +249,15 @@ const AdminSettings = () => {
           </div>
 
           <Tabs defaultValue="services" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-2 h-14 bg-card/50 backdrop-blur">
+            <TabsList className="grid w-full grid-cols-3 h-14 bg-card/50 backdrop-blur">
               <TabsTrigger value="services" className="text-base font-medium">
-                💅 Serviços e Combos
+                💅 Serviços
+              </TabsTrigger>
+              <TabsTrigger value="blocked" className="text-base font-medium">
+                🚫 Horários Bloqueados
               </TabsTrigger>
               <TabsTrigger value="announcements" className="text-base font-medium">
-                📢 Avisos para Clientes
+                📢 Avisos
               </TabsTrigger>
             </TabsList>
 
@@ -359,6 +421,89 @@ const AdminSettings = () => {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            <TabsContent value="blocked" className="space-y-6">
+              <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+                <CardHeader className="border-b border-border/50">
+                  <CardTitle className="text-2xl">Bloquear Horários</CardTitle>
+                  <CardDescription className="text-base mt-1">
+                    Bloqueie datas e horários em que não deseja receber agendamentos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 rounded-lg bg-gradient-subtle border border-border/50">
+                    <div>
+                      <Label>Data *</Label>
+                      <Input
+                        type="date"
+                        value={newBlockedSlot.blocked_date}
+                        onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_date: e.target.value })}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <div>
+                      <Label>Horário *</Label>
+                      <Select
+                        value={newBlockedSlot.blocked_time}
+                        onValueChange={(value) => setNewBlockedSlot({ ...newBlockedSlot, blocked_time: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"].map((time) => (
+                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Motivo (opcional)</Label>
+                      <Input
+                        placeholder="Ex: Férias"
+                        value={newBlockedSlot.reason || ''}
+                        onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, reason: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button onClick={addBlockedSlot} size="lg" className="shadow-soft">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Bloquear Horário
+                  </Button>
+
+                  <div className="space-y-3">
+                    {blockedSlots.map((slot) => (
+                      <Card key={slot.id} className="p-4 hover:shadow-soft transition-shadow border-border/50">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-1">
+                              <Badge variant="destructive">BLOQUEADO</Badge>
+                              <span className="font-semibold text-lg">
+                                {new Date(slot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} - {slot.blocked_time}
+                              </span>
+                            </div>
+                            {slot.reason && (
+                              <p className="text-sm text-muted-foreground">Motivo: {slot.reason}</p>
+                            )}
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => deleteBlockedSlot(slot.id)}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Desbloquear
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                    {blockedSlots.length === 0 && (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <p className="text-lg">Nenhum horário bloqueado</p>
+                        <p className="text-sm mt-1">Use o formulário acima para bloquear horários</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="announcements" className="space-y-6">

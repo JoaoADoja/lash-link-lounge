@@ -25,7 +25,7 @@ interface Service {
   is_combo: boolean;
 }
 
-const availableHours = [
+const allAvailableHours = [
   "09:30", "10:00", "10:30", "11:00", "11:30",
   "13:00", "13:30", "14:00", "14:30", "15:00",
   "15:30", "16:00", "16:30", "17:00", "17:30"
@@ -41,6 +41,7 @@ const Agendamento = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [availableHours, setAvailableHours] = useState<string[]>(allAvailableHours);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -109,6 +110,30 @@ const Agendamento = () => {
         ...prev,
         email: authUser.email || ""
       }));
+    }
+  };
+
+  const loadAvailableHours = async (selectedDate: Date) => {
+    if (!selectedDate) {
+      setAvailableHours(allAvailableHours);
+      return;
+    }
+
+    try {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      
+      const { data: blockedSlots } = await supabase
+        .from("blocked_slots")
+        .select("blocked_time")
+        .eq("blocked_date", dateStr);
+
+      const blockedTimes = blockedSlots?.map(slot => slot.blocked_time) || [];
+      const filteredHours = allAvailableHours.filter(hour => !blockedTimes.includes(hour));
+      
+      setAvailableHours(filteredHours);
+    } catch (error) {
+      console.error("Error loading blocked slots:", error);
+      setAvailableHours(allAvailableHours);
     }
   };
 
@@ -346,7 +371,12 @@ const Agendamento = () => {
                           <Calendar
                             mode="single"
                             selected={date}
-                            onSelect={setDate}
+                            onSelect={(newDate) => {
+                              setDate(newDate);
+                              if (newDate) {
+                                loadAvailableHours(newDate);
+                              }
+                            }}
                             disabled={[
                               { before: new Date() },
                               ...disabledDays
