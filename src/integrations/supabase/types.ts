@@ -175,7 +175,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      professional_assignments: {
+        Row: {
+          full_name: string | null
+          id: string | null
+          pending_appointments: number | null
+          phone: string | null
+          total_appointments: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
