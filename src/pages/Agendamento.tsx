@@ -195,7 +195,7 @@ const Agendamento = () => {
           appointment_date: date.toISOString().split('T')[0],
           appointment_time: formData.time,
           observations: formData.observations || null,
-          status: "pending"
+          status: "confirmed"
         });
 
       if (dbError) {
@@ -221,9 +221,22 @@ const Agendamento = () => {
         console.error('Error creating calendar event:', calendarError);
       }
       
-      const message = `*Novo Agendamento*%0A%0ANome: ${encodeURIComponent(formData.name)}%0AEmail: ${encodeURIComponent(formData.email)}%0ATelefone: ${encodeURIComponent(formData.phone)}%0A%0AServiço: ${encodeURIComponent(selectedService?.name || '')}%0ADuração: ${encodeURIComponent(selectedService?.duration || '')}%0AData: ${encodeURIComponent(dateStr)}%0AHorário: ${formData.time}%0A%0AObservações: ${encodeURIComponent(formData.observations || 'Nenhuma')}`;
-      
-      window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
+      // Send email notification
+      const { error: emailError } = await supabase.functions.invoke('send-appointment-notification', {
+        body: {
+          clientName: formData.name,
+          clientEmail: formData.email,
+          clientPhone: formData.phone,
+          service: selectedService?.name,
+          date: dateStr,
+          time: formData.time,
+          observations: formData.observations
+        }
+      });
+
+      if (emailError) {
+        console.error('Error sending email notification:', emailError);
+      }
       
       toast.dismiss();
       toast.success("Agendamento realizado com sucesso!");
