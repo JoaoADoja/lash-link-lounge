@@ -221,6 +221,37 @@ const AdminSettings = () => {
     }
   };
 
+  const blockEntireDay = async () => {
+    if (!newBlockedSlot.blocked_date) {
+      toast.error("Selecione uma data primeiro");
+      return;
+    }
+
+    if (!confirm("Deseja bloquear TODOS os horários deste dia?")) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const allHours = ["09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"];
+      
+      const slotsToInsert = allHours.map(time => ({
+        professional_id: session?.user?.id,
+        blocked_date: newBlockedSlot.blocked_date,
+        blocked_time: time,
+        reason: newBlockedSlot.reason || 'Dia fechado'
+      }));
+
+      const { error } = await supabase.from("blocked_slots").insert(slotsToInsert);
+
+      if (error) throw error;
+      
+      toast.success(`Todos os horários do dia ${new Date(newBlockedSlot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} foram bloqueados!`);
+      setNewBlockedSlot({ blocked_date: '', blocked_time: '', reason: '' });
+      loadData();
+    } catch (error) {
+      toast.error("Erro ao bloquear dia inteiro");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -428,7 +459,7 @@ const AdminSettings = () => {
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-2xl">Bloquear Horários</CardTitle>
                   <CardDescription className="text-base mt-1">
-                    Bloqueie datas e horários em que não deseja receber agendamentos
+                    Bloqueie horários específicos ou feche o dia inteiro de uma vez
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
@@ -468,10 +499,21 @@ const AdminSettings = () => {
                     </div>
                   </div>
                   
-                  <Button onClick={addBlockedSlot} size="lg" className="shadow-soft">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Bloquear Horário
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button onClick={addBlockedSlot} size="lg" className="shadow-soft flex-1">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Bloquear Horário Único
+                    </Button>
+                    <Button 
+                      onClick={blockEntireDay} 
+                      size="lg" 
+                      variant="destructive"
+                      className="shadow-soft flex-1"
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Bloquear Dia Inteiro
+                    </Button>
+                  </div>
 
                   <div className="space-y-3">
                     {blockedSlots.map((slot) => (

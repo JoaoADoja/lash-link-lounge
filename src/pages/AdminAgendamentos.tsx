@@ -60,9 +60,12 @@ const AdminAgendamentos = () => {
 
   const loadAppointments = async () => {
     try {
+      const today = new Date().toISOString().split('T')[0];
+      
       const { data, error } = await supabase
         .from("appointments")
         .select("*")
+        .gte("appointment_date", today)
         .order("appointment_date", { ascending: true })
         .order("appointment_time", { ascending: true });
 
@@ -132,10 +135,10 @@ const AdminAgendamentos = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent mb-2">
-                Gestão de Agendamentos
+                Próximos Agendamentos
               </h1>
               <p className="text-muted-foreground">
-                {appointments.length} {appointments.length === 1 ? 'agendamento encontrado' : 'agendamentos encontrados'}
+                {appointments.length} {appointments.length === 1 ? 'agendamento próximo' : 'agendamentos próximos'}
               </p>
             </div>
             <div className="flex gap-2 flex-wrap">
