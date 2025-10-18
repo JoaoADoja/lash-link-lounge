@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
+// 1. Importação do 'Star' removida
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import serviceDesign from "@/assets/service-design.jpg";
@@ -16,38 +16,7 @@ const portfolioItems = [
   { image: serviceLashes, title: "Extensão de Cílios" },
 ];
 
-const testimonials = [
-  {
-    name: "Maria Silva",
-    rating: 5,
-    comment: "Profissional excepcional! Minhas sobrancelhas nunca ficaram tão perfeitas. Recomendo muito!",
-  },
-  {
-    name: "Ana Paula",
-    rating: 5,
-    comment: "Adorei o resultado da micropigmentação. Atendimento impecável e ambiente muito acolhedor.",
-  },
-  {
-    name: "Júlia Santos",
-    rating: 5,
-    comment: "O lash lifting ficou incrível! Economizei tempo na minha rotina de maquiagem. Super recomendo!",
-  },
-  {
-    name: "Carla Mendes",
-    rating: 5,
-    comment: "Profissionalismo e cuidado em cada detalhe. Minha experiência foi maravilhosa do início ao fim.",
-  },
-  {
-    name: "Fernanda Costa",
-    rating: 5,
-    comment: "Melhor lugar para cuidar das sobrancelhas! Resultado natural e duradouro. Voltarei sempre!",
-  },
-  {
-    name: "Beatriz Lima",
-    rating: 5,
-    comment: "Simplesmente perfeito! A atenção aos detalhes e o resultado final superaram minhas expectativas.",
-  },
-];
+// 2. A lista (array) 'testimonials' foi removida מכאן
 
 const Portfolio = () => {
   return (
@@ -60,8 +29,9 @@ const Portfolio = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
             Portfólio
           </h1>
+          {/* Texto do parágrafo atualizado */}
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Confira alguns dos nossos trabalhos e os depoimentos de clientes satisfeitas
+            Confira alguns dos nossos trabalhos
           </p>
         </div>
 
@@ -88,25 +58,8 @@ const Portfolio = () => {
           </div>
         </div>
 
-        {/* Depoimentos */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6 text-center">O Que Nossas Clientes Dizem</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-soft transition-all duration-300 border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-secondary text-secondary" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4 italic">"{testimonial.comment}"</p>
-                  <p className="font-semibold text-foreground">— {testimonial.name}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        {/* 3. A seção 'Depoimentos' foi removida מכאן */}
+        
       </main>
 
       <Footer />
