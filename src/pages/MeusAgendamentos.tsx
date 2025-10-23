@@ -19,6 +19,9 @@ interface Appointment {
   status: string;
   observations: string | null;
   created_at: string;
+  profiles?: {
+    full_name: string;
+  };
 }
 
 const MeusAgendamentos = () => {
@@ -33,7 +36,7 @@ const MeusAgendamentos = () => {
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session?.user) {
       navigate("/auth");
       return;
@@ -49,20 +52,33 @@ const MeusAgendamentos = () => {
       setUserName(profile.full_name);
     }
 
-    loadAppointments();
+    loadAppointments(session.user.id);
   };
 
-  const loadAppointments = async () => {
+  const loadAppointments = async (userId: string) => {
     try {
+      // 🔹 Busca os agendamentos da cliente logada e o nome da profissional
       const { data, error } = await supabase
         .from("appointments")
-        .select("*")
+        .select(`
+          id,
+          service,
+          appointment_date,
+          appointment_time,
+          status,
+          observations,
+          created_at,
+          professional_id,
+          profiles:professional_id(full_name)
+        `)
+        .eq("user_id", userId)
         .order("appointment_date", { ascending: true })
         .order("appointment_time", { ascending: true });
 
       if (error) throw error;
       setAppointments(data || []);
     } catch (error) {
+      console.error(error);
       toast.error("Erro ao carregar agendamentos");
     } finally {
       setLoading(false);
@@ -81,7 +97,7 @@ const MeusAgendamentos = () => {
       confirmed: "default",
       cancelled: "destructive"
     };
-    
+
     const labels: Record<string, string> = {
       pending: "Pendente",
       confirmed: "Confirmado",
@@ -102,7 +118,7 @@ const MeusAgendamentos = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
-      
+
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
@@ -131,15 +147,30 @@ const MeusAgendamentos = () => {
           ) : (
             <div className="grid gap-4">
               {appointments.map((appointment) => (
-                <Card key={appointment.id} className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
+                <Card
+                  key={appointment.id}
+                  className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur"
+                >
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-xl mb-1">{appointment.service}</CardTitle>
+
+                        {/* ✅ Nome da profissional */}
+                        {appointment.profiles && (
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Profissional: {appointment.profiles.full_name}
+                          </p>
+                        )}
+
                         <CardDescription className="flex items-center gap-4 text-base">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {format(new Date(appointment.appointment_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                            {format(
+                              new Date(appointment.appointment_date),
+                              "dd 'de' MMMM 'de' yyyy",
+                              { locale: ptBR }
+                            )}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -150,6 +181,7 @@ const MeusAgendamentos = () => {
                       {getStatusBadge(appointment.status)}
                     </div>
                   </CardHeader>
+
                   {appointment.observations && (
                     <CardContent>
                       <p className="text-sm text-muted-foreground">
