@@ -34,6 +34,7 @@ const MeusAgendamentos = () => {
     checkUser();
   }, [navigate]);
 
+  // 🔹 Verifica usuário logado
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -55,56 +56,55 @@ const MeusAgendamentos = () => {
     loadAppointments(session.user.id);
   };
 
+  // 🔹 Carrega agendamentos do usuário
   const loadAppointments = async (userId: string) => {
-  try {
-    // 🔹 Busca os agendamentos da cliente logada
-    const { data, error } = await supabase
-      .from("appointments")
-      .select(`
-        id,
-        service,
-        appointment_date,
-        appointment_time,
-        status,
-        observations,
-        created_at,
-        professional_id
-      `)
-      .eq("user_id", userId)
-      .order("appointment_date", { ascending: true })
-      .order("appointment_time", { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select(`
+          id,
+          service,
+          appointment_date,
+          appointment_time,
+          status,
+          observations,
+          created_at,
+          professional_id
+        `)
+        .eq("user_id", userId)
+        .order("appointment_date", { ascending: true })
+        .order("appointment_time", { ascending: true });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    // 🔹 Agora busca os nomes das profissionais separadamente
-    const { data: professionals, error: profError } = await supabase
-      .from("profiles")
-      .select("id, full_name");
+      const { data: professionals, error: profError } = await supabase
+        .from("profiles")
+        .select("id, full_name");
 
-    if (profError) throw profError;
+      if (profError) throw profError;
 
-    // 🔹 Junta os dados manualmente
-    const joined = (data || []).map((appt) => ({
-      ...appt,
-      profiles: professionals?.find((p) => p.id === appt.professional_id),
-    }));
+      const joined = (data || []).map((appt) => ({
+        ...appt,
+        profiles: professionals?.find((p) => p.id === appt.professional_id),
+      }));
 
-    setAppointments(joined);
-  } catch (error) {
-    console.error(error);
-    toast.error("Erro ao carregar agendamentos");
-  } finally {
-    setLoading(false);
-  }
-};
+      setAppointments(joined);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao carregar agendamentos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
+  // 🔹 Logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
     toast.success("Logout realizado com sucesso!");
   };
 
+  // 🔹 Badge de status
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
@@ -119,6 +119,30 @@ const MeusAgendamentos = () => {
     };
 
     return <Badge variant={variants[status] || "outline"}>{labels[status] || status}</Badge>;
+  };
+
+  // 🔹 Nova função: Cancelar agendamento
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from("appointments")
+        .update({ status: "cancelled" })
+        .eq("id", appointmentId);
+
+      if (error) throw error;
+
+      // Atualiza a lista local
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt.id === appointmentId ? { ...appt, status: "cancelled" } : appt
+        )
+      );
+
+      toast.success("Agendamento cancelado com sucesso!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao cancelar o agendamento.");
+    }
   };
 
   if (loading) {
@@ -170,7 +194,6 @@ const MeusAgendamentos = () => {
                       <div>
                         <CardTitle className="text-xl mb-1">{appointment.service}</CardTitle>
 
-                        {/* ✅ Nome da profissional */}
                         {appointment.profiles && (
                           <p className="text-sm text-muted-foreground mb-1">
                             Profissional: {appointment.profiles.full_name}
@@ -192,7 +215,21 @@ const MeusAgendamentos = () => {
                           </span>
                         </CardDescription>
                       </div>
-                      {getStatusBadge(appointment.status)}
+
+                      <div className="flex flex-col items-end gap-2">
+                        {getStatusBadge(appointment.status)}
+
+                        {/* Botão de cancelar */}
+                        {appointment.status !== "cancelled" && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleCancelAppointment(appointment.id)}
+                          >
+                            Cancelar
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
 
