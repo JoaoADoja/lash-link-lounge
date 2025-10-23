@@ -121,8 +121,11 @@ const MeusAgendamentos = () => {
     return <Badge variant={variants[status] || "outline"}>{labels[status] || status}</Badge>;
   };
 
-  // 🔹 Nova função: Cancelar agendamento
+  // 🔹 Nova função: Cancelar agendamento com confirmação
   const handleCancelAppointment = async (appointmentId: string) => {
+    const confirmCancel = window.confirm("Deseja realmente cancelar este agendamento?");
+    if (!confirmCancel) return;
+
     try {
       const { error } = await supabase
         .from("appointments")
@@ -219,7 +222,7 @@ const MeusAgendamentos = () => {
                       <div className="flex flex-col items-end gap-2">
                         {getStatusBadge(appointment.status)}
 
-                        {/* Botão de cancelar */}
+                        {/* Botão de cancelar com confirmação */}
                         {appointment.status !== "cancelled" && (
                           <Button
                             variant="destructive"
