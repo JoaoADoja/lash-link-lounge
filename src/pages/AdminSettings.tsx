@@ -24,6 +24,7 @@ interface Service {
   is_combo: boolean;
   is_active: boolean;
   display_order: number;
+  image?: string | null;
 }
 
 interface Announcement {
@@ -53,6 +54,18 @@ const AdminSettings = () => {
     blocked_time: '',
     reason: ''
   });
+  const [serviceImage, setServiceImage] = useState<string | null>(null);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setServiceImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     checkProfessional();
@@ -60,7 +73,6 @@ const AdminSettings = () => {
 
   const checkProfessional = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    
     if (!session?.user) {
       navigate("/auth");
       return;
@@ -85,7 +97,6 @@ const AdminSettings = () => {
   const loadData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
       const [servicesRes, announcementsRes, blockedSlotsRes] = await Promise.all([
         supabase.from("services").select("*").order("display_order"),
         supabase.from("announcements").select("*").order("created_at", { ascending: false }),
@@ -111,8 +122,10 @@ const AdminSettings = () => {
 
   const saveService = async (service: Partial<Service>) => {
     try {
+      const serviceData = { ...service, image: serviceImage }; // adiciona a imagem
+
       if (service.id) {
-        const { id, ...updateData } = service;
+        const { id, ...updateData } = serviceData;
         const { error } = await supabase
           .from("services")
           .update(updateData as any)
@@ -120,14 +133,16 @@ const AdminSettings = () => {
         if (error) throw error;
         toast.success("Serviço atualizado!");
       } else {
-        const { id, ...insertData } = service;
+        const { id, ...insertData } = serviceData;
         const { error } = await supabase
           .from("services")
           .insert([insertData as any]);
         if (error) throw error;
         toast.success("Serviço adicionado!");
       }
+
       setEditingService(null);
+      setServiceImage(null); // limpa após salvar
       loadData();
     } catch (error) {
       toast.error("Erro ao salvar serviço");
@@ -188,19 +203,15 @@ const AdminSettings = () => {
       toast.error("Preencha data e horário");
       return;
     }
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
       const { error } = await supabase.from("blocked_slots").insert([{
         professional_id: session?.user?.id,
         blocked_date: newBlockedSlot.blocked_date,
         blocked_time: newBlockedSlot.blocked_time,
         reason: newBlockedSlot.reason || null
       }]);
-
       if (error) throw error;
-      
       toast.success("Horário bloqueado com sucesso!");
       setNewBlockedSlot({ blocked_date: '', blocked_time: '', reason: '' });
       loadData();
@@ -226,24 +237,20 @@ const AdminSettings = () => {
       toast.error("Selecione uma data primeiro");
       return;
     }
-
     if (!confirm("Deseja bloquear TODOS os horários deste dia?")) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const allHours = ["09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"];
-      
       const slotsToInsert = allHours.map(time => ({
         professional_id: session?.user?.id,
         blocked_date: newBlockedSlot.blocked_date,
         blocked_time: time,
         reason: newBlockedSlot.reason || 'Dia fechado'
       }));
-
       const { error } = await supabase.from("blocked_slots").insert(slotsToInsert);
-
       if (error) throw error;
-      
+
       toast.success(`Todos os horários do dia ${new Date(newBlockedSlot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} foram bloqueados!`);
       setNewBlockedSlot({ blocked_date: '', blocked_time: '', reason: '' });
       loadData();
@@ -263,7 +270,6 @@ const AdminSettings = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
-      
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -281,17 +287,12 @@ const AdminSettings = () => {
 
           <Tabs defaultValue="services" className="space-y-8">
             <TabsList className="grid w-full grid-cols-3 h-14 bg-card/50 backdrop-blur">
-              <TabsTrigger value="services" className="text-base font-medium">
-                💅 Serviços
-              </TabsTrigger>
-              <TabsTrigger value="blocked" className="text-base font-medium">
-                🚫 Horários Bloqueados
-              </TabsTrigger>
-              <TabsTrigger value="announcements" className="text-base font-medium">
-                📢 Avisos
-              </TabsTrigger>
+              <TabsTrigger value="services" className="text-base font-medium">💅 Serviços</TabsTrigger>
+              <TabsTrigger value="blocked" className="text-base font-medium">🚫 Horários Bloqueados</TabsTrigger>
+              <TabsTrigger value="announcements" className="text-base font-medium">📢 Avisos</TabsTrigger>
             </TabsList>
 
+            {/* ------------------- SERVIÇOS ------------------- */}
             <TabsContent value="services" className="space-y-6">
               <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
                 <CardHeader className="border-b border-border/50">
@@ -302,16 +303,19 @@ const AdminSettings = () => {
                         Edite valores, duração e disponibilidade dos serviços
                       </CardDescription>
                     </div>
-                    <Button size="lg" className="shadow-soft" onClick={() => setEditingService({
-                      id: '',
-                      name: '',
-                      price: 0,
-                      duration: '',
-                      category: 'general',
-                      is_combo: false,
-                      is_active: true,
-                      display_order: services.length + 1
-                    })}>
+                    <Button size="lg" className="shadow-soft" onClick={() => {
+                      setEditingService({
+                        id: '',
+                        name: '',
+                        price: 0,
+                        duration: '',
+                        category: 'general',
+                        is_combo: false,
+                        is_active: true,
+                        display_order: services.length + 1
+                      });
+                      setServiceImage(null); // limpa imagem ao criar novo serviço
+                    }}>
                       <Plus className="mr-2 h-4 w-4" />
                       Novo Serviço
                     </Button>
@@ -321,24 +325,26 @@ const AdminSettings = () => {
                   {services.map((service) => (
                     <Card key={service.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                        <div className="md:col-span-2">
-                          <p className="font-semibold text-lg mb-1">{service.name}</p>
-                          <div className="flex gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {service.category}
-                            </Badge>
-                            {service.is_combo && (
-                              <Badge variant="secondary" className="text-xs">
-                                COMBO
-                              </Badge>
-                            )}
+                        <div className="md:col-span-2 flex items-center gap-4">
+                          {service.image && (
+                            <img
+                              src={service.image}
+                              alt={service.name}
+                              className="w-16 h-16 object-cover rounded-md border"
+                            />
+                          )}
+                          <div>
+                            <p className="font-semibold text-lg mb-1">{service.name}</p>
+                            <div className="flex gap-2">
+                              <Badge variant="outline" className="text-xs">{service.category}</Badge>
+                              {service.is_combo && <Badge variant="secondary" className="text-xs">COMBO</Badge>}
+                            </div>
                           </div>
                         </div>
                         <div>
                           <p className="text-xl font-bold text-primary">R$ {service.price.toFixed(2)}</p>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {service.duration}
+                            <Clock className="h-3 w-3" /> {service.duration}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -349,7 +355,10 @@ const AdminSettings = () => {
                           <span className="text-sm font-medium">{service.is_active ? '✓ Ativo' : '○ Inativo'}</span>
                         </div>
                         <div className="flex gap-2 justify-end">
-                          <Button variant="outline" size="sm" onClick={() => setEditingService(service)}>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            setEditingService(service);
+                            setServiceImage(service.image || null); // carrega imagem existente
+                          }}>
                             Editar
                           </Button>
                           <Button variant="destructive" size="sm" onClick={() => deleteService(service.id)}>
@@ -368,6 +377,7 @@ const AdminSettings = () => {
                 </CardContent>
               </Card>
 
+              {/* ------------------- FORMULÁRIO DE EDIÇÃO ------------------- */}
               {editingService && (
                 <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
                   <CardHeader className="border-b border-border/50">
@@ -440,227 +450,126 @@ const AdminSettings = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button onClick={() => saveService(editingService)}>
-                        <Save className="mr-2 h-4 w-4" />
-                        Salvar
-                      </Button>
-                      <Button variant="outline" onClick={() => setEditingService(null)}>
-                        Cancelar
-                      </Button>
+
+                    {/* Upload de imagem */}
+                    <div>
+                      <Label>Imagem do Serviço</Label>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} />
+                      {serviceImage && (
+                        <img src={serviceImage} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-md border" />
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" onClick={() => { setEditingService(null); setServiceImage(null); }}>Cancelar</Button>
+                      <Button onClick={() => saveService(editingService)}>Salvar <Save className="ml-2 h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
               )}
             </TabsContent>
 
+            {/* ------------------- HORÁRIOS BLOQUEADOS ------------------- */}
             <TabsContent value="blocked" className="space-y-6">
               <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                <CardHeader className="border-b border-border/50">
-                  <CardTitle className="text-2xl">Bloquear Horários</CardTitle>
-                  <CardDescription className="text-base mt-1">
-                    Bloqueie horários específicos ou feche o dia inteiro de uma vez
-                  </CardDescription>
+                <CardHeader>
+                  <CardTitle>Gerenciar Horários Bloqueados</CardTitle>
+                  <CardDescription>Bloqueie horários ou dias inteiros para não receber agendamentos</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 rounded-lg bg-gradient-subtle border border-border/50">
-                    <div>
-                      <Label>Data *</Label>
-                      <Input
-                        type="date"
-                        value={newBlockedSlot.blocked_date}
-                        onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_date: e.target.value })}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-                    <div>
-                      <Label>Horário *</Label>
-                      <Select
-                        value={newBlockedSlot.blocked_time}
-                        onValueChange={(value) => setNewBlockedSlot({ ...newBlockedSlot, blocked_time: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"].map((time) => (
-                            <SelectItem key={time} value={time}>{time}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Motivo (opcional)</Label>
-                      <Input
-                        placeholder="Ex: Férias"
-                        value={newBlockedSlot.reason || ''}
-                        onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, reason: e.target.value })}
-                      />
-                    </div>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Input
+                      type="date"
+                      value={newBlockedSlot.blocked_date}
+                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_date: e.target.value })}
+                    />
+                    <Input
+                      type="time"
+                      value={newBlockedSlot.blocked_time}
+                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_time: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Motivo (opcional)"
+                      value={newBlockedSlot.reason}
+                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, reason: e.target.value })}
+                    />
                   </div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button onClick={addBlockedSlot} size="lg" className="shadow-soft flex-1">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Bloquear Horário Único
-                    </Button>
-                    <Button 
-                      onClick={blockEntireDay} 
-                      size="lg" 
-                      variant="destructive"
-                      className="shadow-soft flex-1"
-                    >
-                      <Clock className="mr-2 h-4 w-4" />
-                      Bloquear Dia Inteiro
-                    </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={addBlockedSlot}>Bloquear horário</Button>
+                    <Button variant="destructive" onClick={blockEntireDay}>Bloquear dia inteiro</Button>
                   </div>
 
-                  <div className="space-y-3">
-                    {blockedSlots.map((slot) => (
-                      <Card key={slot.id} className="p-4 hover:shadow-soft transition-shadow border-border/50">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-1">
-                              <Badge variant="destructive">BLOQUEADO</Badge>
-                              <span className="font-semibold text-lg">
-                                {new Date(slot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} - {slot.blocked_time}
-                              </span>
-                            </div>
-                            {slot.reason && (
-                              <p className="text-sm text-muted-foreground">Motivo: {slot.reason}</p>
-                            )}
-                          </div>
-                          <Button variant="outline" size="sm" onClick={() => deleteBlockedSlot(slot.id)}>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Desbloquear
-                          </Button>
+                  <div className="mt-4 space-y-2">
+                    {blockedSlots.map(slot => (
+                      <div key={slot.id} className="flex justify-between items-center border rounded-md p-2">
+                        <div>
+                          {new Date(slot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} - {slot.blocked_time} {slot.reason && `(${slot.reason})`}
                         </div>
-                      </Card>
-                    ))}
-                    {blockedSlots.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <p className="text-lg">Nenhum horário bloqueado</p>
-                        <p className="text-sm mt-1">Use o formulário acima para bloquear horários</p>
+                        <Button variant="destructive" size="sm" onClick={() => deleteBlockedSlot(slot.id)}>Desbloquear</Button>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
+            {/* ------------------- AVISOS ------------------- */}
             <TabsContent value="announcements" className="space-y-6">
               <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                <CardHeader className="border-b border-border/50">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <CardTitle className="text-2xl">Avisos para Clientes</CardTitle>
-                      <CardDescription className="text-base mt-1">
-                        Crie avisos importantes que aparecerão na página inicial
-                      </CardDescription>
-                    </div>
-                    <Button size="lg" className="shadow-soft" onClick={() => setEditingAnnouncement({
-                      id: '',
-                      title: '',
-                      content: '',
-                      is_active: true
-                    })}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Aviso
-                    </Button>
-                  </div>
+                <CardHeader>
+                  <CardTitle>Gerenciar Avisos</CardTitle>
+                  <CardDescription>Adicione avisos importantes para seus clientes</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 pt-6">
-                  {announcements.map((announcement) => (
-                    <Card key={announcement.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
-                      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-xl">{announcement.title}</h3>
-                            {announcement.is_active && (
-                              <Badge variant="default" className="text-xs">ATIVO</Badge>
-                            )}
-                          </div>
-                          <p className="text-muted-foreground leading-relaxed">{announcement.content}</p>
+                <CardContent className="space-y-4">
+                  <Button onClick={() => setEditingAnnouncement({ id: '', title: '', content: '', is_active: true })}>
+                    Novo Aviso
+                  </Button>
+
+                  {announcements.map(announcement => (
+                    <Card key={announcement.id} className="p-4 hover:shadow-soft transition-shadow border-border/50">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold">{announcement.title}</p>
+                          <p className="text-sm text-muted-foreground">{announcement.content}</p>
                         </div>
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={announcement.is_active}
-                              onCheckedChange={(checked) => saveAnnouncement({ id: announcement.id, is_active: checked })}
-                            />
-                            <span className="text-sm font-medium">{announcement.is_active ? '✓ Ativo' : '○ Inativo'}</span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setEditingAnnouncement(announcement)}>
-                              Editar
-                            </Button>
-                            <Button variant="destructive" size="sm" onClick={() => deleteAnnouncement(announcement.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                        <div className="flex gap-2">
+                          <Switch
+                            checked={announcement.is_active}
+                            onCheckedChange={(checked) => saveAnnouncement({ id: announcement.id, is_active: checked })}
+                          />
+                          <Button variant="outline" size="sm" onClick={() => setEditingAnnouncement(announcement)}>Editar</Button>
+                          <Button variant="destructive" size="sm" onClick={() => deleteAnnouncement(announcement.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </Card>
                   ))}
-                  {announcements.length === 0 && (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <p className="text-lg">Nenhum aviso cadastrado</p>
-                      <p className="text-sm mt-1">Clique em "Novo Aviso" para começar</p>
-                    </div>
+
+                  {editingAnnouncement && (
+                    <Card className="p-4 border border-border/50 shadow-soft">
+                      <Input
+                        placeholder="Título"
+                        value={editingAnnouncement.title}
+                        onChange={(e) => setEditingAnnouncement({ ...editingAnnouncement, title: e.target.value })}
+                      />
+                      <Textarea
+                        placeholder="Conteúdo"
+                        value={editingAnnouncement.content}
+                        onChange={(e) => setEditingAnnouncement({ ...editingAnnouncement, content: e.target.value })}
+                      />
+                      <div className="flex gap-2 justify-end mt-2">
+                        <Button variant="outline" onClick={() => setEditingAnnouncement(null)}>Cancelar</Button>
+                        <Button onClick={() => saveAnnouncement(editingAnnouncement)}>Salvar</Button>
+                      </div>
+                    </Card>
                   )}
                 </CardContent>
               </Card>
-
-              {editingAnnouncement && (
-                <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                  <CardHeader className="border-b border-border/50">
-                    <CardTitle className="text-2xl">
-                      {editingAnnouncement.id ? '✏️ Editar Aviso' : '➕ Novo Aviso'}
-                    </CardTitle>
-                    <CardDescription>Preencha todos os campos obrigatórios (*)</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label>Título *</Label>
-                      <Input
-                        value={editingAnnouncement.title}
-                        onChange={(e) => setEditingAnnouncement({ ...editingAnnouncement, title: e.target.value })}
-                        placeholder="Ex: Horários especiais de fim de ano"
-                      />
-                    </div>
-                    <div>
-                      <Label>Conteúdo *</Label>
-                      <Textarea
-                        value={editingAnnouncement.content}
-                        onChange={(e) => setEditingAnnouncement({ ...editingAnnouncement, content: e.target.value })}
-                        placeholder="Descreva o aviso importante para seus clientes..."
-                        rows={4}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={editingAnnouncement.is_active}
-                        onCheckedChange={(checked) => setEditingAnnouncement({ ...editingAnnouncement, is_active: checked })}
-                      />
-                      <Label>Aviso ativo?</Label>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={() => saveAnnouncement(editingAnnouncement)}>
-                        <Save className="mr-2 h-4 w-4" />
-                        Salvar
-                      </Button>
-                      <Button variant="outline" onClick={() => setEditingAnnouncement(null)}>
-                        Cancelar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </TabsContent>
           </Tabs>
         </div>
       </main>
-
       <Footer />
     </div>
   );
