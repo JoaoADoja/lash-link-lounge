@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Calendar, Clock, Loader2, LogOut } from "lucide-react";
+import { Calendar, Clock, Loader2, LogOut, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -121,7 +121,7 @@ const MeusAgendamentos = () => {
     return <Badge variant={variants[status] || "outline"}>{labels[status] || status}</Badge>;
   };
 
-  // 🔹 Nova função: Cancelar agendamento com confirmação
+  // 🔹 Cancelar agendamento com confirmação
   const handleCancelAppointment = async (appointmentId: string) => {
     const confirmCancel = window.confirm("Deseja realmente cancelar este agendamento?");
     if (!confirmCancel) return;
@@ -134,7 +134,6 @@ const MeusAgendamentos = () => {
 
       if (error) throw error;
 
-      // Atualiza a lista local
       setAppointments((prev) =>
         prev.map((appt) =>
           appt.id === appointmentId ? { ...appt, status: "cancelled" } : appt
@@ -169,10 +168,16 @@ const MeusAgendamentos = () => {
               </h1>
               <p className="text-muted-foreground">Olá, {userName}!</p>
             </div>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="hero" onClick={() => navigate("/agendamento")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Agendar Procedimento
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            </div>
           </div>
 
           {appointments.length === 0 ? (
@@ -181,7 +186,7 @@ const MeusAgendamentos = () => {
                 <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground mb-4">Você ainda não tem agendamentos</p>
                 <Button variant="hero" onClick={() => navigate("/agendamento")}>
-                  Fazer Agendamento
+                  Agendar Procedimento
                 </Button>
               </CardContent>
             </Card>
