@@ -56,34 +56,48 @@ const MeusAgendamentos = () => {
   };
 
   const loadAppointments = async (userId: string) => {
-    try {
-      // 🔹 Busca os agendamentos da cliente logada e o nome da profissional
-      const { data, error } = await supabase
-        .from("appointments")
-        .select(`
-          id,
-          service,
-          appointment_date,
-          appointment_time,
-          status,
-          observations,
-          created_at,
-          professional_id,
-          profiles:professional_id(full_name)
-        `)
-        .eq("user_id", userId)
-        .order("appointment_date", { ascending: true })
-        .order("appointment_time", { ascending: true });
+  try {
+    // 🔹 Busca os agendamentos da cliente logada
+    const { data, error } = await supabase
+      .from("appointments")
+      .select(`
+        id,
+        service,
+        appointment_date,
+        appointment_time,
+        status,
+        observations,
+        created_at,
+        professional_id
+      `)
+      .eq("user_id", userId)
+      .order("appointment_date", { ascending: true })
+      .order("appointment_time", { ascending: true });
 
-      if (error) throw error;
-      setAppointments(data || []);
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao carregar agendamentos");
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (error) throw error;
+
+    // 🔹 Agora busca os nomes das profissionais separadamente
+    const { data: professionals, error: profError } = await supabase
+      .from("profiles")
+      .select("id, full_name");
+
+    if (profError) throw profError;
+
+    // 🔹 Junta os dados manualmente
+    const joined = (data || []).map((appt) => ({
+      ...appt,
+      profiles: professionals?.find((p) => p.id === appt.professional_id),
+    }));
+
+    setAppointments(joined);
+  } catch (error) {
+    console.error(error);
+    toast.error("Erro ao carregar agendamentos");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
