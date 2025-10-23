@@ -114,29 +114,83 @@ const Agendamento = () => {
     }
   };
 
-  const loadAvailableHours = async (selectedDate: Date) => {
-    if (!selectedDate) {
-      setAvailableHours(allAvailableHours);
-      return;
-    }
+ const loadAvailableHours = async (selectedDate: Date) => {
+  if (!selectedDate) {
+    setAvailableHours(allAvailableHours);
+    return;
+  }
 
-    try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      
-      const { data: blockedSlots } = await supabase
-        .from("blocked_slots")
-        .select("blocked_time")
-        .eq("blocked_date", dateStr);
+  try {
+    const dateStr = selectedDate.toISOString().split("T")[0];
 
-      const blockedTimes = blockedSlots?.map(slot => slot.blocked_time) || [];
-      const filteredHours = allAvailableHours.filter(hour => !blockedTimes.includes(hour));
-      
-      setAvailableHours(filteredHours);
-    } catch (error) {
-      console.error("Error loading blocked slots:", error);
-      setAvailableHours(allAvailableHours);
-    }
-  };
+    // 🔹 Busca os agendamentos confirmados desse dia
+    const { data: appointments, error } = await supabase
+      .from("appointments")
+      .select("appointment_time, service")
+      .eq("appointment_date", dateStr)
+      .eq("status", "confirmed");
+
+    if (error) throw error;
+
+    // 🔹 Carrega a duração de cada serviço (em minutos)
+    const { data: services } = await supabase
+      .from("services")
+      .select("name, duration");
+
+    // 🔹 Converte horários ocupados em uma lista completa de intervalos bloqueados
+    const blockedTimes: string[] = [];
+
+    appointments?.forEach((appt) => {
+      const service = services?.find((s) => s.name === appt.service);
+      if (!service) return;
+
+      // Ex: "1h30" → 90 minutos
+      const duration = convertDurationToMinutes(service.duration);
+      const startTime = appt.appointment_time;
+
+      const occupiedSlots = getTimeSlots(startTime, duration);
+      blockedTimes.push(...occupiedSlots);
+    });
+
+    // 🔹 Filtra os horários disponíveis
+    const filteredHours = allAvailableHours.filter(
+      (hour) => !blockedTimes.includes(hour)
+    );
+
+    setAvailableHours(filteredHours);
+  } catch (error) {
+    console.error("Erro ao carregar horários disponíveis:", error);
+    setAvailableHours(allAvailableHours);
+  }
+};
+
+// 🕒 Função auxiliar — converte "1h30" ou "45min" em minutos
+const convertDurationToMinutes = (duration: string): number => {
+  const hours = duration.match(/(\d+)h/);
+  const minutes = duration.match(/(\d+)min/);
+  return (hours ? parseInt(hours[1]) * 60 : 0) + (minutes ? parseInt(minutes[1]) : 0);
+};
+
+// 📅 Função auxiliar — gera slots de 30min dentro da duração
+const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
+  const slots: string[] = [];
+  const [hour, minute] = startTime.split(":").map(Number);
+  const start = new Date();
+  start.setHours(hour, minute, 0, 0);
+
+  const end = new Date(start.getTime() + durationMinutes * 60000);
+
+  let current = new Date(start);
+  while (current < end) {
+    const hh = current.getHours().toString().padStart(2, "0");
+    const mm = current.getMinutes().toString().padStart(2, "0");
+    slots.push(`${hh}:${mm}`);
+    current.setMinutes(current.getMinutes() + 30);
+  }
+
+  return slots;
+};
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
