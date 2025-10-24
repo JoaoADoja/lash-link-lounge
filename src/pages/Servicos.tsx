@@ -27,8 +27,9 @@ const services = [
     image: serviceDesign,
   },
   {
-    title: "Depilação na Linha\n",
-    description: "Remoção precisa de pelos faciais"<br>,
+    {/* CORREÇÃO: Removido '\n' do título e '<br>' solto da descrição */}
+    title: "Depilação na Linha",
+    description: "Remoção precisa de pelos faciais",
     price: "A partir de R$ 40",
     duration: "30 min",
     image: serviceDesign,
@@ -127,7 +128,8 @@ const Servicos = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
-            Nossos Serviçõs
+            Nossos Serviços
+            {/* CORREÇÃO: Corrigido "Serviçõs" para "Serviços" */}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Cuidamos de você com carinho e atenção. Cada tratamento é pensado para realçar o que há de mais bonito em você.
@@ -137,7 +139,8 @@ const Servicos = () => {
         {/* Serviços Principais */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {services.map((service, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border">
+            {/* MUDANÇA 1: Adicionado 'flex flex-col' ao Card */}
+            <Card key={index} className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border flex flex-col">
               <div className="h-48 overflow-hidden">
                 <img
                   src={service.image}
@@ -147,17 +150,21 @@ const Servicos = () => {
               </div>
               <CardHeader>
                 <CardTitle className="text-xl">{service.title}</CardTitle>
-                <CardDescription>{service.description}</CardDescription>
+                {/* MUDANÇA 2: Altura mínima para alinhar as descrições */}
+                <CardDescription className="min-h-[2.5rem]">{service.description}</CardDescription>
               </CardHeader>
-              <CardContent>
+                {/* MUDANÇA 3: 'flex flex-col flex-1' para o CardContent crescer */}
+              <CardContent className="flex flex-col flex-1">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center space-x-2 text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span className="text-sm">{service.duration}</span>
                   </div>
-                  <div className="text-2xl font-bold text-primary">{service.price}</div>
+                    {/* MUDANÇA 4: Altura mínima para alinhar os preços (por causa do "A partir de") */}
+                  <div className="text-2xl font-bold text-primary min-h-[3rem] flex items-center">{service.price}</div>
                 </div>
-                <Link to="/agendamento">
+                    {/* MUDANÇA 5: 'mt-auto' para empurrar o botão para a base */}
+                <Link to="/agendamento" className="mt-auto">
                   <Button variant="default" className="w-full">
                     Agendar Agora
                   </Button>
@@ -170,70 +177,4 @@ const Servicos = () => {
         {/* Combos */}
         <div className="mb-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3 flex items-center justify-center gap-2">
-              <Sparkles className="h-8 w-8 text-secondary" />
-              Combos Especiais
-              <Sparkles className="h-8 w-8 text-secondary" />
-            </h2>
-            <p className="text-muted-foreground">
-              Economize com nossos pacotes combinados
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {combos.map((combo, index) => (
-              <Card key={index} className="border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">{combo.title}</CardTitle>
-                  <CardDescription>{combo.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-sm">{combo.duration}</span>
-                      </div>
-                      <div className="text-xl font-bold text-secondary">{combo.price}</div>
-                    </div>
-                    <Link to="/agendamento">
-                      <Button variant="gold" size="sm" className="w-full">
-                        Agendar Combo
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Combos */}
-        <div className="mb-12">
-          {/* ... (código existente dos combos) ... */}
-        </div> {/* <-- FIM DOS COMBOS */}
-
-      
-
-         {/* CTA */} 
-        {/*    <div className="text-center bg-gradient-rose-gold rounded-2xl p-8 md:p-12 shadow-glow">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Pronta para se sentir ainda mais linda?
-          </h2>
-          <p className="text-white/90 mb-6 text-lg">
-            Agende seu horário e transforme seu olhar
-          </p>
-          <Link to="/agendamento">
-            <Button variant="secondary" size="lg" className="shadow-gold">
-              Agendar Horário
-            </Button>
-          </Link>
-        </div> */}
-      </main>
-
-      <Footer />
-    </div> 
-  );
-}; 
-
-export default Servicos;
+            <h2 className="text-3xl font-
