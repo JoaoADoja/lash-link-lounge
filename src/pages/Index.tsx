@@ -8,6 +8,16 @@ import heroImage from "@/assets/hero-eyebrows.jpg";
 import serviceDesign from "@/assets/service-design.jpg";
 import serviceLashes from "@/assets/service-lashes.jpg";
 import serviceMicro from "@/assets/service-micro.jpg";
+// ... (outros imports)
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
+// ... (o resto dos seus imports, como Navbar, Footer, etc.)
 
 const Index = () => {
   const featuredServices = [
