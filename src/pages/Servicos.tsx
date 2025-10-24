@@ -216,7 +216,7 @@ const Servicos = () => {
       
 
          {/* CTA */} 
-        {/*  <div className="text-center bg-gradient-rose-gold rounded-2xl p-8 md:p-12 shadow-glow">
+         <div className="text-center bg-gradient-rose-gold rounded-2xl p-8 md:p-12 shadow-glow">
           <h2 className="text-3xl font-bold text-white mb-4">
             Pronta para se sentir ainda mais linda?
           </h2>
@@ -232,7 +232,7 @@ const Servicos = () => {
       </main>
 
       <Footer />
-    </div> */}
+    </div> 
   );
 }; 
 
