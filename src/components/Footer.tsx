@@ -35,19 +35,7 @@ const Footer = () => {
 
               </div>
 
-              <div className="flex items-center space-x-3">
-
-                <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-
-                <a href="https://wa.me/551197780-6048" className="text-sm hover:text-primary transition-colors">
-
-                  (11) 97780-6048
-
-                </a>
-
-              </div>
-
-              <div className="flex items-center space-x-3">
+               <div className="flex items-center space-x-3">
                 
                  <a
 
@@ -66,6 +54,18 @@ const Footer = () => {
               <span>@cardoso_sobrancelhas</span>
 
             </a>
+
+              </div>
+
+              <div className="flex items-center space-x-3">
+
+                <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+
+                <a href="https://wa.me/551197780-6048" className="text-sm hover:text-primary transition-colors">
+
+                  (11) 97780-6048
+
+                </a>
 
               </div>
 
