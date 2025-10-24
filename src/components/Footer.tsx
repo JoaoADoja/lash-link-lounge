@@ -10,44 +10,7 @@ const Footer = () => {
 
       <div className="container mx-auto px-4 py-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-          {/* Sobre */}
-
-          <div>
-
-            <h3 className="text-xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent mb-4">
-
-              Cardoso Sobrancelhas
-
-            </h3>
-
-            <p className="text-muted-foreground mb-4">
-
-              Especialistas em design de sobrancelhas, micropigmentação e cuidados estéticos faciais.
-
-            </p>
-
-            <a
-
-              href="https://instagram.com"
-
-              target="_blank"
-
-              rel="noopener noreferrer"
-
-              className="inline-flex items-center space-x-2 text-primary hover:text-primary-glow transition-colors"
-
-            >
-
-              <Instagram className="h-5 w-5" />
-
-              <span>@cardososobrancelhas</span>
-
-            </a>
-
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
 
           {/* Contato */}
