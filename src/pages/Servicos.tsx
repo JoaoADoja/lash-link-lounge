@@ -130,7 +130,7 @@ const Servicos = () => {
             Nossos Serviços
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tratamentos especializados para realçar sua beleza natural com a máxima qualidade e cuidado
+            Cuidamos de você com carinho e atenção. Cada tratamento é pensado para realçar o que há de mais bonito em você.
           </p>
         </div>
 
