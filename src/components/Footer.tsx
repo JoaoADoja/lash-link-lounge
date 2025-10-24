@@ -87,7 +87,7 @@ const Footer = () => {
 
               <div className="text-sm">
 
-                <p className="font-medium text-foreground">Terça-Feira a Quinta-Feira</p>
+                <p className="font-medium text-foreground">Terça-Feira à Quinta-Feira</p>
 
                 <p>09h30 às 19h00</p>
 
