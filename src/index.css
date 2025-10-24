@@ -18,12 +18,12 @@ All colors MUST be HSL.
     --popover-foreground: 340 15% 20%;
 
     /* Rose elegante como cor principal */
-   /* --primary: 340 75% 55%;
+    --primary: 340 75% 55%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 340 85% 70%;
 
     /* Dourado (tom mais clássico) */
-   /* --secondary: 50 85% 60%;
+    --secondary: 50 85% 60%;
     --secondary-foreground: 340 15% 20%;
 
     --muted: 340 20% 96%;
