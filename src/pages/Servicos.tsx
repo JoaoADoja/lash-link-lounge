@@ -147,7 +147,7 @@ const Servicos = () => {
               </div>
               <CardHeader>
                 <CardTitle className="text-xl">{service.title}</CardTitle>
-                <CardDescription className="whitespace-pre-line">{service.description}</CardDescription>
+                <CardDescription>{service.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center mb-4">
