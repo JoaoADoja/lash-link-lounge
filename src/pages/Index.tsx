@@ -74,9 +74,9 @@ const Index = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 animate-fade-in">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Realce su{" "}
+                Seu olhar{" "}
                 <span className="bg-gradient-rose-gold bg-clip-text text-transparent">
-                  Beleza Natural
+                  Merece destaque
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground">
