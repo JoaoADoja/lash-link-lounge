@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,36 +23,13 @@ interface Service {
   is_combo: boolean;
   is_active: boolean;
   display_order: number;
-  description?: string | null;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  is_active: boolean;
-}
-
-interface BlockedSlot {
-  id: string;
-  blocked_date: string;
-  blocked_time: string;
-  reason: string | null;
 }
 
 const AdminSettings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
-  const [newBlockedSlot, setNewBlockedSlot] = useState<Partial<BlockedSlot>>({
-    blocked_date: "",
-    blocked_time: "",
-    reason: "",
-  });
   const [serviceImage, setServiceImage] = useState<string | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,15 +37,12 @@ const AdminSettings = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setServiceImage(reader.result as string);
+        const base64 = reader.result as string;
+        setServiceImage(base64);
       };
       reader.readAsDataURL(file);
     }
   };
-
-  useEffect(() => {
-    checkProfessional();
-  }, []);
 
   const checkProfessional = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -97,25 +70,17 @@ const AdminSettings = () => {
   const loadData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const [servicesRes, announcementsRes, blockedSlotsRes] = await Promise.all([
-        supabase.from("services").select("*").order("display_order"),
-        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
-        supabase
-          .from("blocked_slots")
-          .select("*")
-          .eq("professional_id", session?.user?.id)
-          .order("blocked_date", { ascending: false }),
-      ]);
+      const { data, error } = await supabase.from("services").select("*").order("display_order");
+      if (error) throw error;
 
-      if (servicesRes.error) throw servicesRes.error;
-      if (announcementsRes.error) throw announcementsRes.error;
-      if (blockedSlotsRes.error) throw blockedSlotsRes.error;
+      const servicesWithImages = data.map((s) => {
+        const localImage = localStorage.getItem(`image_${s.id}`);
+        return { ...s, localImage };
+      });
 
-      setServices(servicesRes.data || []);
-      setAnnouncements(announcementsRes.data || []);
-      setBlockedSlots(blockedSlotsRes.data || []);
-    } catch {
-      toast.error("Erro ao carregar dados");
+      setServices(servicesWithImages);
+    } catch (error) {
+      toast.error("Erro ao carregar serviços");
     } finally {
       setLoading(false);
     }
@@ -123,25 +88,39 @@ const AdminSettings = () => {
 
   const saveService = async (service: Partial<Service>) => {
     try {
-      const serviceData = { ...service };
-      if (serviceImage) serviceData.description = serviceImage;
+      let updatedService: Service | null = null;
 
       if (service.id) {
-        const { id, ...updateData } = serviceData;
-        const { error } = await supabase.from("services").update(updateData as any).eq("id", id);
+        const { id, ...updateData } = service;
+        const { data, error } = await supabase
+          .from("services")
+          .update(updateData as any)
+          .eq("id", id)
+          .select()
+          .single();
         if (error) throw error;
+        updatedService = data;
         toast.success("Serviço atualizado!");
       } else {
-        const { id, ...insertData } = serviceData;
-        const { error } = await supabase.from("services").insert([insertData as any]);
+        const { id, ...insertData } = service;
+        const { data, error } = await supabase
+          .from("services")
+          .insert([insertData as any])
+          .select()
+          .single();
         if (error) throw error;
+        updatedService = data;
         toast.success("Serviço adicionado!");
+      }
+
+      if (updatedService && serviceImage) {
+        localStorage.setItem(`image_${updatedService.id}`, serviceImage);
       }
 
       setEditingService(null);
       setServiceImage(null);
       loadData();
-    } catch {
+    } catch (error) {
       toast.error("Erro ao salvar serviço");
     }
   };
@@ -151,6 +130,7 @@ const AdminSettings = () => {
     try {
       const { error } = await supabase.from("services").delete().eq("id", id);
       if (error) throw error;
+      localStorage.removeItem(`image_${id}`);
       toast.success("Serviço excluído!");
       loadData();
     } catch {
@@ -158,97 +138,9 @@ const AdminSettings = () => {
     }
   };
 
-  const saveAnnouncement = async (announcement: Partial<Announcement>) => {
-    try {
-      if (announcement.id) {
-        const { id, ...updateData } = announcement;
-        const { error } = await supabase.from("announcements").update(updateData as any).eq("id", id);
-        if (error) throw error;
-        toast.success("Aviso atualizado!");
-      } else {
-        const { id, ...insertData } = announcement;
-        const { error } = await supabase.from("announcements").insert([insertData as any]);
-        if (error) throw error;
-        toast.success("Aviso adicionado!");
-      }
-      setEditingAnnouncement(null);
-      loadData();
-    } catch {
-      toast.error("Erro ao salvar aviso");
-    }
-  };
-
-  const deleteAnnouncement = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este aviso?")) return;
-    try {
-      const { error } = await supabase.from("announcements").delete().eq("id", id);
-      if (error) throw error;
-      toast.success("Aviso excluído!");
-      loadData();
-    } catch {
-      toast.error("Erro ao excluir aviso");
-    }
-  };
-
-  const addBlockedSlot = async () => {
-    if (!newBlockedSlot.blocked_date || !newBlockedSlot.blocked_time) {
-      toast.error("Preencha data e horário");
-      return;
-    }
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const { error } = await supabase.from("blocked_slots").insert([{
-        professional_id: session?.user?.id,
-        blocked_date: newBlockedSlot.blocked_date,
-        blocked_time: newBlockedSlot.blocked_time,
-        reason: newBlockedSlot.reason || null,
-      }]);
-      if (error) throw error;
-      toast.success("Horário bloqueado com sucesso!");
-      setNewBlockedSlot({ blocked_date: "", blocked_time: "", reason: "" });
-      loadData();
-    } catch {
-      toast.error("Erro ao bloquear horário");
-    }
-  };
-
-  const deleteBlockedSlot = async (id: string) => {
-    if (!confirm("Deseja desbloquear este horário?")) return;
-    try {
-      const { error } = await supabase.from("blocked_slots").delete().eq("id", id);
-      if (error) throw error;
-      toast.success("Horário desbloqueado!");
-      loadData();
-    } catch {
-      toast.error("Erro ao desbloquear horário");
-    }
-  };
-
-  const blockEntireDay = async () => {
-    if (!newBlockedSlot.blocked_date) {
-      toast.error("Selecione uma data primeiro");
-      return;
-    }
-    if (!confirm("Deseja bloquear TODOS os horários deste dia?")) return;
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const allHours = ["09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"];
-      const slotsToInsert = allHours.map(time => ({
-        professional_id: session?.user?.id,
-        blocked_date: newBlockedSlot.blocked_date,
-        blocked_time: time,
-        reason: newBlockedSlot.reason || "Dia fechado",
-      }));
-      const { error } = await supabase.from("blocked_slots").insert(slotsToInsert);
-      if (error) throw error;
-      toast.success("Dia bloqueado com sucesso!");
-      setNewBlockedSlot({ blocked_date: "", blocked_time: "", reason: "" });
-      loadData();
-    } catch {
-      toast.error("Erro ao bloquear dia inteiro");
-    }
-  };
+  useEffect(() => {
+    checkProfessional();
+  }, []);
 
   if (loading) {
     return (
@@ -268,123 +160,136 @@ const AdminSettings = () => {
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent mb-2">
                 Painel Administrativo
               </h1>
-              <p className="text-muted-foreground">Gerencie serviços, preços e avisos importantes</p>
+              <p className="text-muted-foreground">
+                Gerencie serviços, preços e imagens
+              </p>
             </div>
             <Button variant="outline" size="lg" onClick={() => navigate("/admin-agendamentos")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para Agendamentos
+              Voltar
             </Button>
           </div>
 
           <Tabs defaultValue="services" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 h-14 bg-card/50 backdrop-blur">
-              <TabsTrigger value="services" className="text-base font-medium">💅 Serviços</TabsTrigger>
-              <TabsTrigger value="blocked" className="text-base font-medium">🚫 Horários Bloqueados</TabsTrigger>
-              <TabsTrigger value="announcements" className="text-base font-medium">📢 Avisos</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-1 h-14 bg-card/50 backdrop-blur">
+              <TabsTrigger value="services" className="text-base font-medium">
+                💅 Serviços
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="services" className="space-y-6">
               <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                <CardHeader className="border-b border-border/50">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <CardTitle className="text-2xl">Gerenciar Serviços</CardTitle>
-                      <CardDescription>Edite valores, duração e disponibilidade dos serviços</CardDescription>
-                    </div>
-                    <Button size="lg" onClick={() => {
-                      setEditingService({
-                        id: "",
-                        name: "",
-                        price: 0,
-                        duration: "",
-                        category: "general",
-                        is_combo: false,
-                        is_active: true,
-                        display_order: services.length + 1,
-                      });
-                      setServiceImage(null);
-                    }}>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-2xl">Gerenciar Serviços</CardTitle>
+                    <Button
+                      onClick={() => {
+                        setEditingService({
+                          id: "",
+                          name: "",
+                          price: 0,
+                          duration: "",
+                          category: "general",
+                          is_combo: false,
+                          is_active: true,
+                          display_order: services.length + 1,
+                        });
+                        setServiceImage(null);
+                      }}
+                    >
                       <Plus className="mr-2 h-4 w-4" /> Novo Serviço
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3 pt-6">
-                  {services.map(service => (
-                    <Card key={service.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                        <div className="md:col-span-2 flex items-center gap-4">
-                          {service.description?.startsWith("data:image") && (
-                            <img src={service.description} alt={service.name} className="w-16 h-16 object-cover rounded-md border" />
-                          )}
-                          <div>
-                            <p className="font-semibold text-lg mb-1">{service.name}</p>
-                            <div className="flex gap-2">
-                              <Badge variant="outline" className="text-xs">{service.category}</Badge>
-                              {service.is_combo && <Badge variant="secondary" className="text-xs">COMBO</Badge>}
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xl font-bold text-primary">R$ {service.price.toFixed(2)}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> {service.duration}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={service.is_active}
-                            onCheckedChange={(checked) => saveService({ id: service.id, is_active: checked })}
+                <CardContent className="space-y-4">
+                  {services.map((service) => (
+                    <Card key={service.id} className="p-4 flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        {service.localImage && (
+                          <img
+                            src={service.localImage}
+                            alt={service.name}
+                            className="w-16 h-16 object-cover rounded-md border"
                           />
-                          <span className="text-sm font-medium">{service.is_active ? "✓ Ativo" : "○ Inativo"}</span>
+                        )}
+                        <div>
+                          <p className="font-semibold">{service.name}</p>
+                          <Badge variant="outline">{service.category}</Badge>
                         </div>
-                        <div className="flex gap-2 justify-end">
-                          <Button variant="outline" size="sm" onClick={() => {
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
                             setEditingService(service);
-                            setServiceImage(service.description?.startsWith("data:image") ? service.description : null);
-                          }}>
-                            Editar
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={() => deleteService(service.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                            setServiceImage(localStorage.getItem(`image_${service.id}`));
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteService(service.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </Card>
                   ))}
-                  {services.length === 0 && (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <p className="text-lg">Nenhum serviço cadastrado</p>
-                      <p className="text-sm mt-1">Clique em "Novo Serviço" para começar</p>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
               {editingService && (
                 <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                  <CardHeader className="border-b border-border/50">
-                    <CardTitle className="text-2xl">
-                      {editingService.id ? "✏️ Editar Serviço" : "➕ Novo Serviço"}
-                    </CardTitle>
+                  <CardHeader>
+                    <CardTitle>{editingService.id ? "Editar Serviço" : "Novo Serviço"}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Nome do Serviço *</Label>
-                        <Input value={editingService.name} onChange={(e) => setEditingService({ ...editingService, name: e.target.value })} />
+                        <Label>Nome *</Label>
+                        <Input
+                          value={editingService.name}
+                          onChange={(e) =>
+                            setEditingService({ ...editingService, name: e.target.value })
+                          }
+                        />
                       </div>
                       <div>
-                        <Label>Preço (R$) *</Label>
-                        <Input type="number" value={editingService.price} onChange={(e) => setEditingService({ ...editingService, price: parseFloat(e.target.value) })} />
+                        <Label>Preço *</Label>
+                        <Input
+                          type="number"
+                          value={editingService.price}
+                          onChange={(e) =>
+                            setEditingService({
+                              ...editingService,
+                              price: parseFloat(e.target.value),
+                            })
+                          }
+                        />
                       </div>
                       <div>
                         <Label>Duração *</Label>
-                        <Input value={editingService.duration} onChange={(e) => setEditingService({ ...editingService, duration: e.target.value })} />
+                        <Input
+                          value={editingService.duration}
+                          onChange={(e) =>
+                            setEditingService({ ...editingService, duration: e.target.value })
+                          }
+                        />
                       </div>
                       <div>
                         <Label>Categoria *</Label>
-                        <Select value={editingService.category} onValueChange={(value) => setEditingService({ ...editingService, category: value })}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        <Select
+                          value={editingService.category}
+                          onValueChange={(value) =>
+                            setEditingService({ ...editingService, category: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="sobrancelhas">Sobrancelhas</SelectItem>
                             <SelectItem value="cilios">Cílios</SelectItem>
@@ -396,25 +301,33 @@ const AdminSettings = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Switch checked={editingService.is_combo} onCheckedChange={(checked) => setEditingService({ ...editingService, is_combo: checked })} />
-                          <Label>É um combo?</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch checked={editingService.is_active} onCheckedChange={(checked) => setEditingService({ ...editingService, is_active: checked })} />
-                          <Label>Ativo?</Label>
-                        </div>
-                      </div>
                     </div>
+
                     <div>
                       <Label>Imagem do Serviço</Label>
                       <input type="file" accept="image/*" onChange={handleImageUpload} />
-                      {serviceImage && <img src={serviceImage} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-md border" />}
+                      {serviceImage && (
+                        <img
+                          src={serviceImage}
+                          alt="Preview"
+                          className="mt-2 w-32 h-32 object-cover rounded-md border"
+                        />
+                      )}
                     </div>
+
                     <div className="flex gap-2 justify-end">
-                      <Button variant="outline" onClick={() => { setEditingService(null); setServiceImage(null); }}>Cancelar</Button>
-                      <Button onClick={() => saveService(editingService)}>Salvar <Save className="ml-2 h-4 w-4" /></Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingService(null);
+                          setServiceImage(null);
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button onClick={() => saveService(editingService)}>
+                        Salvar <Save className="ml-2 h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
