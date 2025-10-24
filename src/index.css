@@ -22,15 +22,15 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 100%;
     --primary-glow: 340 85% 70%;
 
-    /* Dourado luxuoso como secundário */
-    --secondary: 45 95% 60%;
+    /* Dourado (tom mais clássico) */
+    --secondary: 50 85% 60%;
     --secondary-foreground: 340 15% 20%;
 
     --muted: 340 20% 96%;
     --muted-foreground: 340 10% 45%;
 
-    /* Accent dourado */
-    --accent: 45 95% 60%;
+    /* Accent dourado (tom mais clássico) */
+    --accent: 50 85% 60%;
     --accent-foreground: 340 15% 20%;
 
     --destructive: 0 84.2% 60.2%;
