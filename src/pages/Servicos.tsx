@@ -214,7 +214,38 @@ const Servicos = () => {
         </div> {/* <-- FIM DOS COMBOS */}
 
 
-        
+        {/* NOVA SEÇÃO DE FORMULÁRIO DE COMENTÁRIOS */}
+        <div className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-3">Deixe seu Comentário</h2>
+            <p className="text-muted-foreground">
+              Adoramos saber a sua opinião sobre nossos serviços!
+            </p>
+          </div>
+          <Card className="max-w-2xl mx-auto border-border bg-card">
+            <CardHeader>
+              <CardTitle>Conte-nos sua experiência</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Seu Nome</Label>
+                  <Input id="name" placeholder="Ex: Maria Silva" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="comment">Seu Comentário</Label>
+                  <Textarea id="comment" placeholder="Escreva seu depoimento aqui..." rows={4} />
+                </div>
+                <Button type="submit" variant="default" className="w-full">
+                  Enviar Comentário
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+        {/* FIM DA NOVA SEÇÃO */}
+
+
         {/* Depoimentos */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold mb-6 text-center">O Que Nossas Clientes Dizem</h2>
