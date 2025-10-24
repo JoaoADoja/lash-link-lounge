@@ -41,7 +41,7 @@ const services = [
     image: serviceLashes,
   },
   {
-    title: "Brown Lamination",
+    title: "Brow Lamination",
     description: "Laminação de sobrancelhas para um efeito disciplinado",
     price: "R$ 160",
     duration: "1h10min",
