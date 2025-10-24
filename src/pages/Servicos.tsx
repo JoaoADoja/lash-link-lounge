@@ -232,8 +232,8 @@ const Servicos = () => {
       </main>
 
       <Footer />
-    </div>
+    </div> */}
   );
-}; */}
+}; 
 
 export default Servicos;
