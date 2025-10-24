@@ -112,16 +112,74 @@ const Index = () => {
       </section>
 
       {/* Serviços em Destaque */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Serviços em Destaque
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Conheça nossos procedimentos mais procurados
-            </p>
-          </div>
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Serviços em Destaque
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Conheça nossos procedimentos mais procurados
+            </p>
+          </div>
+
+          {/* NOVO CARROSSEL MANUAL */}
+          <Carousel
+            className="w-full max-w-4xl mx-auto"
+            opts={{
+              loop: true, // Faz o carrossel voltar ao início
+            }}
+          >
+            <CarouselContent>
+              {featuredServices.map((service, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1 h-full">
+                    {/* Mantivemos exatamente o mesmo Card que você já tinha */}
+                    <Card
+                      className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border group h-full flex flex-col"
+                    >
+                      <div className="h-64 overflow-hidden">
+                        <img
+                          src={service.image}
+                          alt={service.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <CardHeader>
+                        <CardTitle>{service.title}</CardTitle>
+                        <CardDescription>{service.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex flex-col flex-1 justify-end">
+                        <div className="flex justify-between items-center">
+                          <span className="text-2xl font-bold text-primary">{service.price}</span>
+                          <Link to="/agendamento">
+                            <Button variant="default" size="sm">
+                              Agendar
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {/* Botões de Próximo/Anterior (só aparecem em telas maiores) */}
+            <CarouselPrevious className="hidden sm:flex" />
+            <CarouselNext className="hidden sm:flex" />
+          </Carousel>
+          {/* FIM DO CARROSSEL */}
+
+          <div className="text-center mt-12"> {/* Adicionei um espaçamento aqui */}
+            <Link to="/servicos">
+              <Button variant="outline" size="lg">
+                Ver Todos os Serviços
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {featuredServices.map((service, index) => (
