@@ -39,7 +39,7 @@ const Footer = () => {
                 
                  <a
 
-              href="https://www.instagram.com/cardoso_sobrancelhas?igsh=Y2Rqamx6YmdocnMx"
+              href="https://www.instagram.com/cardoso_sobrancelhas/?igsh=MWp5OG4wZXl4bGtxOA%3D%3D&utm_source=qr#"
 
               target="_blank"
 
