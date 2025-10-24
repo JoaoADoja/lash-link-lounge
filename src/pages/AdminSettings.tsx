@@ -24,7 +24,7 @@ interface Service {
   is_combo: boolean;
   is_active: boolean;
   display_order: number;
-  image?: string | null;
+  description?: string | null;
 }
 
 interface Announcement {
@@ -50,9 +50,9 @@ const AdminSettings = () => {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [newBlockedSlot, setNewBlockedSlot] = useState<Partial<BlockedSlot>>({
-    blocked_date: '',
-    blocked_time: '',
-    reason: ''
+    blocked_date: "",
+    blocked_time: "",
+    reason: "",
   });
   const [serviceImage, setServiceImage] = useState<string | null>(null);
 
@@ -100,10 +100,11 @@ const AdminSettings = () => {
       const [servicesRes, announcementsRes, blockedSlotsRes] = await Promise.all([
         supabase.from("services").select("*").order("display_order"),
         supabase.from("announcements").select("*").order("created_at", { ascending: false }),
-        supabase.from("blocked_slots")
+        supabase
+          .from("blocked_slots")
           .select("*")
           .eq("professional_id", session?.user?.id)
-          .order("blocked_date", { ascending: false })
+          .order("blocked_date", { ascending: false }),
       ]);
 
       if (servicesRes.error) throw servicesRes.error;
@@ -113,7 +114,7 @@ const AdminSettings = () => {
       setServices(servicesRes.data || []);
       setAnnouncements(announcementsRes.data || []);
       setBlockedSlots(blockedSlotsRes.data || []);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao carregar dados");
     } finally {
       setLoading(false);
@@ -122,29 +123,25 @@ const AdminSettings = () => {
 
   const saveService = async (service: Partial<Service>) => {
     try {
-      const serviceData = { ...service, image: serviceImage }; // adiciona a imagem
+      const serviceData = { ...service };
+      if (serviceImage) serviceData.description = serviceImage;
 
       if (service.id) {
         const { id, ...updateData } = serviceData;
-        const { error } = await supabase
-          .from("services")
-          .update(updateData as any)
-          .eq("id", id);
+        const { error } = await supabase.from("services").update(updateData as any).eq("id", id);
         if (error) throw error;
         toast.success("Serviço atualizado!");
       } else {
         const { id, ...insertData } = serviceData;
-        const { error } = await supabase
-          .from("services")
-          .insert([insertData as any]);
+        const { error } = await supabase.from("services").insert([insertData as any]);
         if (error) throw error;
         toast.success("Serviço adicionado!");
       }
 
       setEditingService(null);
-      setServiceImage(null); // limpa após salvar
+      setServiceImage(null);
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao salvar serviço");
     }
   };
@@ -156,7 +153,7 @@ const AdminSettings = () => {
       if (error) throw error;
       toast.success("Serviço excluído!");
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao excluir serviço");
     }
   };
@@ -165,23 +162,18 @@ const AdminSettings = () => {
     try {
       if (announcement.id) {
         const { id, ...updateData } = announcement;
-        const { error } = await supabase
-          .from("announcements")
-          .update(updateData as any)
-          .eq("id", id);
+        const { error } = await supabase.from("announcements").update(updateData as any).eq("id", id);
         if (error) throw error;
         toast.success("Aviso atualizado!");
       } else {
         const { id, ...insertData } = announcement;
-        const { error } = await supabase
-          .from("announcements")
-          .insert([insertData as any]);
+        const { error } = await supabase.from("announcements").insert([insertData as any]);
         if (error) throw error;
         toast.success("Aviso adicionado!");
       }
       setEditingAnnouncement(null);
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao salvar aviso");
     }
   };
@@ -193,7 +185,7 @@ const AdminSettings = () => {
       if (error) throw error;
       toast.success("Aviso excluído!");
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao excluir aviso");
     }
   };
@@ -209,13 +201,13 @@ const AdminSettings = () => {
         professional_id: session?.user?.id,
         blocked_date: newBlockedSlot.blocked_date,
         blocked_time: newBlockedSlot.blocked_time,
-        reason: newBlockedSlot.reason || null
+        reason: newBlockedSlot.reason || null,
       }]);
       if (error) throw error;
       toast.success("Horário bloqueado com sucesso!");
-      setNewBlockedSlot({ blocked_date: '', blocked_time: '', reason: '' });
+      setNewBlockedSlot({ blocked_date: "", blocked_time: "", reason: "" });
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao bloquear horário");
     }
   };
@@ -227,7 +219,7 @@ const AdminSettings = () => {
       if (error) throw error;
       toast.success("Horário desbloqueado!");
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao desbloquear horário");
     }
   };
@@ -246,15 +238,14 @@ const AdminSettings = () => {
         professional_id: session?.user?.id,
         blocked_date: newBlockedSlot.blocked_date,
         blocked_time: time,
-        reason: newBlockedSlot.reason || 'Dia fechado'
+        reason: newBlockedSlot.reason || "Dia fechado",
       }));
       const { error } = await supabase.from("blocked_slots").insert(slotsToInsert);
       if (error) throw error;
-
-      toast.success(`Todos os horários do dia ${new Date(newBlockedSlot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} foram bloqueados!`);
-      setNewBlockedSlot({ blocked_date: '', blocked_time: '', reason: '' });
+      toast.success("Dia bloqueado com sucesso!");
+      setNewBlockedSlot({ blocked_date: "", blocked_time: "", reason: "" });
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao bloquear dia inteiro");
     }
   };
@@ -292,46 +283,38 @@ const AdminSettings = () => {
               <TabsTrigger value="announcements" className="text-base font-medium">📢 Avisos</TabsTrigger>
             </TabsList>
 
-            {/* ------------------- SERVIÇOS ------------------- */}
             <TabsContent value="services" className="space-y-6">
               <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
                 <CardHeader className="border-b border-border/50">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                       <CardTitle className="text-2xl">Gerenciar Serviços</CardTitle>
-                      <CardDescription className="text-base mt-1">
-                        Edite valores, duração e disponibilidade dos serviços
-                      </CardDescription>
+                      <CardDescription>Edite valores, duração e disponibilidade dos serviços</CardDescription>
                     </div>
-                    <Button size="lg" className="shadow-soft" onClick={() => {
+                    <Button size="lg" onClick={() => {
                       setEditingService({
-                        id: '',
-                        name: '',
+                        id: "",
+                        name: "",
                         price: 0,
-                        duration: '',
-                        category: 'general',
+                        duration: "",
+                        category: "general",
                         is_combo: false,
                         is_active: true,
-                        display_order: services.length + 1
+                        display_order: services.length + 1,
                       });
-                      setServiceImage(null); // limpa imagem ao criar novo serviço
+                      setServiceImage(null);
                     }}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Serviço
+                      <Plus className="mr-2 h-4 w-4" /> Novo Serviço
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-6">
-                  {services.map((service) => (
+                  {services.map(service => (
                     <Card key={service.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                         <div className="md:col-span-2 flex items-center gap-4">
-                          {service.image && (
-                            <img
-                              src={service.image}
-                              alt={service.name}
-                              className="w-16 h-16 object-cover rounded-md border"
-                            />
+                          {service.description?.startsWith("data:image") && (
+                            <img src={service.description} alt={service.name} className="w-16 h-16 object-cover rounded-md border" />
                           )}
                           <div>
                             <p className="font-semibold text-lg mb-1">{service.name}</p>
@@ -352,12 +335,12 @@ const AdminSettings = () => {
                             checked={service.is_active}
                             onCheckedChange={(checked) => saveService({ id: service.id, is_active: checked })}
                           />
-                          <span className="text-sm font-medium">{service.is_active ? '✓ Ativo' : '○ Inativo'}</span>
+                          <span className="text-sm font-medium">{service.is_active ? "✓ Ativo" : "○ Inativo"}</span>
                         </div>
                         <div className="flex gap-2 justify-end">
                           <Button variant="outline" size="sm" onClick={() => {
                             setEditingService(service);
-                            setServiceImage(service.image || null); // carrega imagem existente
+                            setServiceImage(service.description?.startsWith("data:image") ? service.description : null);
                           }}>
                             Editar
                           </Button>
@@ -377,51 +360,31 @@ const AdminSettings = () => {
                 </CardContent>
               </Card>
 
-              {/* ------------------- FORMULÁRIO DE EDIÇÃO ------------------- */}
               {editingService && (
                 <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
                   <CardHeader className="border-b border-border/50">
                     <CardTitle className="text-2xl">
-                      {editingService.id ? '✏️ Editar Serviço' : '➕ Novo Serviço'}
+                      {editingService.id ? "✏️ Editar Serviço" : "➕ Novo Serviço"}
                     </CardTitle>
-                    <CardDescription>Preencha todos os campos obrigatórios (*)</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label>Nome do Serviço *</Label>
-                        <Input
-                          value={editingService.name}
-                          onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
-                          placeholder="Ex: Design de Sobrancelhas"
-                        />
+                        <Input value={editingService.name} onChange={(e) => setEditingService({ ...editingService, name: e.target.value })} />
                       </div>
                       <div>
                         <Label>Preço (R$) *</Label>
-                        <Input
-                          type="number"
-                          value={editingService.price}
-                          onChange={(e) => setEditingService({ ...editingService, price: parseFloat(e.target.value) })}
-                          placeholder="70"
-                        />
+                        <Input type="number" value={editingService.price} onChange={(e) => setEditingService({ ...editingService, price: parseFloat(e.target.value) })} />
                       </div>
                       <div>
                         <Label>Duração *</Label>
-                        <Input
-                          value={editingService.duration}
-                          onChange={(e) => setEditingService({ ...editingService, duration: e.target.value })}
-                          placeholder="40 min"
-                        />
+                        <Input value={editingService.duration} onChange={(e) => setEditingService({ ...editingService, duration: e.target.value })} />
                       </div>
                       <div>
                         <Label>Categoria *</Label>
-                        <Select
-                          value={editingService.category}
-                          onValueChange={(value) => setEditingService({ ...editingService, category: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
+                        <Select value={editingService.category} onValueChange={(value) => setEditingService({ ...editingService, category: value })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="sobrancelhas">Sobrancelhas</SelectItem>
                             <SelectItem value="cilios">Cílios</SelectItem>
@@ -435,31 +398,20 @@ const AdminSettings = () => {
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingService.is_combo}
-                            onCheckedChange={(checked) => setEditingService({ ...editingService, is_combo: checked })}
-                          />
+                          <Switch checked={editingService.is_combo} onCheckedChange={(checked) => setEditingService({ ...editingService, is_combo: checked })} />
                           <Label>É um combo?</Label>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingService.is_active}
-                            onCheckedChange={(checked) => setEditingService({ ...editingService, is_active: checked })}
-                          />
+                          <Switch checked={editingService.is_active} onCheckedChange={(checked) => setEditingService({ ...editingService, is_active: checked })} />
                           <Label>Ativo?</Label>
                         </div>
                       </div>
                     </div>
-
-                    {/* Upload de imagem */}
                     <div>
                       <Label>Imagem do Serviço</Label>
                       <input type="file" accept="image/*" onChange={handleImageUpload} />
-                      {serviceImage && (
-                        <img src={serviceImage} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-md border" />
-                      )}
+                      {serviceImage && <img src={serviceImage} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-md border" />}
                     </div>
-
                     <div className="flex gap-2 justify-end">
                       <Button variant="outline" onClick={() => { setEditingService(null); setServiceImage(null); }}>Cancelar</Button>
                       <Button onClick={() => saveService(editingService)}>Salvar <Save className="ml-2 h-4 w-4" /></Button>
@@ -467,105 +419,6 @@ const AdminSettings = () => {
                   </CardContent>
                 </Card>
               )}
-            </TabsContent>
-
-            {/* ------------------- HORÁRIOS BLOQUEADOS ------------------- */}
-            <TabsContent value="blocked" className="space-y-6">
-              <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                <CardHeader>
-                  <CardTitle>Gerenciar Horários Bloqueados</CardTitle>
-                  <CardDescription>Bloqueie horários ou dias inteiros para não receber agendamentos</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Input
-                      type="date"
-                      value={newBlockedSlot.blocked_date}
-                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_date: e.target.value })}
-                    />
-                    <Input
-                      type="time"
-                      value={newBlockedSlot.blocked_time}
-                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_time: e.target.value })}
-                    />
-                    <Input
-                      placeholder="Motivo (opcional)"
-                      value={newBlockedSlot.reason}
-                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, reason: e.target.value })}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={addBlockedSlot}>Bloquear horário</Button>
-                    <Button variant="destructive" onClick={blockEntireDay}>Bloquear dia inteiro</Button>
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    {blockedSlots.map(slot => (
-                      <div key={slot.id} className="flex justify-between items-center border rounded-md p-2">
-                        <div>
-                          {new Date(slot.blocked_date + 'T00:00:00').toLocaleDateString('pt-BR')} - {slot.blocked_time} {slot.reason && `(${slot.reason})`}
-                        </div>
-                        <Button variant="destructive" size="sm" onClick={() => deleteBlockedSlot(slot.id)}>Desbloquear</Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* ------------------- AVISOS ------------------- */}
-            <TabsContent value="announcements" className="space-y-6">
-              <Card className="shadow-elegant border-primary/10 bg-card/50 backdrop-blur">
-                <CardHeader>
-                  <CardTitle>Gerenciar Avisos</CardTitle>
-                  <CardDescription>Adicione avisos importantes para seus clientes</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button onClick={() => setEditingAnnouncement({ id: '', title: '', content: '', is_active: true })}>
-                    Novo Aviso
-                  </Button>
-
-                  {announcements.map(announcement => (
-                    <Card key={announcement.id} className="p-4 hover:shadow-soft transition-shadow border-border/50">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-semibold">{announcement.title}</p>
-                          <p className="text-sm text-muted-foreground">{announcement.content}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Switch
-                            checked={announcement.is_active}
-                            onCheckedChange={(checked) => saveAnnouncement({ id: announcement.id, is_active: checked })}
-                          />
-                          <Button variant="outline" size="sm" onClick={() => setEditingAnnouncement(announcement)}>Editar</Button>
-                          <Button variant="destructive" size="sm" onClick={() => deleteAnnouncement(announcement.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-
-                  {editingAnnouncement && (
-                    <Card className="p-4 border border-border/50 shadow-soft">
-                      <Input
-                        placeholder="Título"
-                        value={editingAnnouncement.title}
-                        onChange={(e) => setEditingAnnouncement({ ...editingAnnouncement, title: e.target.value })}
-                      />
-                      <Textarea
-                        placeholder="Conteúdo"
-                        value={editingAnnouncement.content}
-                        onChange={(e) => setEditingAnnouncement({ ...editingAnnouncement, content: e.target.value })}
-                      />
-                      <div className="flex gap-2 justify-end mt-2">
-                        <Button variant="outline" onClick={() => setEditingAnnouncement(null)}>Cancelar</Button>
-                        <Button onClick={() => saveAnnouncement(editingAnnouncement)}>Salvar</Button>
-                      </div>
-                    </Card>
-                  )}
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </div>

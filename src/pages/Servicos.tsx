@@ -1,130 +1,69 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Clock, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import serviceDesign from "@/assets/service-design.jpg";
-import serviceLashes from "@/assets/service-lashes.jpg";
-import serviceMicro from "@/assets/service-micro.jpg";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-const services = [
-  {
-    title: "Design de Sobrancelhas",
-    description: "Modelagem perfeita que realça sua beleza natural",
-    price: "R$ 70",
-    duration: "40 min",
-    image: serviceDesign,
-  },
-  {
-    title: "Design com Henna",
-    description: "Design + coloração com henna para sobrancelhas mais marcantes",
-    price: "R$ 80",
-    duration: "1h",
-    image: serviceDesign,
-  },
-  {
-    title: "Depilação na Linha",
-    description: "Remoção precisa de pelos faciais",
-    price: "A partir de R$ 40",
-    duration: "30 min",
-    image: serviceDesign,
-  },
-  {
-    title: "Lash Lifting",
-    description: "Curvatura e alongamento natural dos cílios",
-    price: "R$ 160",
-    duration: "1h10min",
-    image: serviceLashes,
-  },
-  {
-    title: "Brown Lamination",
-    description: "Laminação de sobrancelhas para um efeito disciplinado",
-    price: "R$ 160",
-    duration: "1h10min",
-    image: serviceDesign,
-  },
-  {
-    title: "Micropigmentação Blading Fio a Fio",
-    description: "Técnica realista que imita fios naturais",
-    price: "R$ 400",
-    duration: "2h",
-    image: serviceMicro,
-  },
-  {
-    title: "Micropigmentação Shadow",
-    description: "Efeito esfumado e sombreado nas sobrancelhas",
-    price: "R$ 450",
-    duration: "2h",
-    image: serviceMicro,
-  },
-  {
-    title: "Limpeza de Pele",
-    description: "Tratamento facial completo e revitalizante",
-    price: "R$ 120",
-    duration: "1h20min",
-    image: serviceDesign,
-  },
-  {
-    title: "Extensão de Cílios - Volume Brasileiro",
-    description: "Volume natural e elegante",
-    price: "R$ 140",
-    duration: "2h30min",
-    image: serviceLashes,
-  },
-  {
-    title: "Extensão de Cílios - Volume Egípcio",
-    description: "Volume dramático e impactante",
-    price: "R$ 160",
-    duration: "2h30min",
-    image: serviceLashes,
-  },
-  {
-    title: "Extensão de Cílios - Volume Médio",
-    description: "Equilíbrio entre natural e volumoso",
-    price: "R$ 160",
-    duration: "2h30min",
-    image: serviceLashes,
-  },
-];
-
-const combos = [
-  {
-    title: "Combo 1",
-    description: "Design + Buço",
-    price: "R$ 80",
-    duration: "1h",
-  },
-  {
-    title: "Combo 2",
-    description: "Design com Henna + Buço",
-    price: "R$ 100",
-    duration: "1h20min",
-  },
-  {
-    title: "Combo 3",
-    description: "Design + Lash Lifting",
-    price: "R$ 180",
-    duration: "2h",
-  },
-  {
-    title: "Combo 4",
-    description: "Lash Lifting + Brown Lamination",
-    price: "R$ 280",
-    duration: "2h",
-  },
-];
+interface Service {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  duration: string;
+  category: string;
+  is_combo: boolean;
+  is_active: boolean;
+}
 
 const Servicos = () => {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  const loadServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      setServices(data || []);
+    } catch {
+      toast.error("Erro ao carregar serviços");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const combos = services.filter((s) => s.is_combo);
+  const normalServices = services.filter((s) => !s.is_combo);
+
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
-      
+
       <main className="container mx-auto px-4 pt-24 pb-12">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
             Nossos Serviços
@@ -134,20 +73,27 @@ const Servicos = () => {
           </p>
         </div>
 
-        {/* Serviços Principais */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {services.map((service, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border">
+          {normalServices.map((service) => (
+            <Card key={service.id} className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border">
               <div className="h-48 overflow-hidden">
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
+                {service.description?.startsWith("data:image") ? (
+                  <img
+                    src={service.description}
+                    alt={service.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                    Sem imagem
+                  </div>
+                )}
               </div>
               <CardHeader>
-                <CardTitle className="text-xl">{service.title}</CardTitle>
-                <CardDescription>{service.description}</CardDescription>
+                <CardTitle className="text-xl">{service.name}</CardTitle>
+                <CardDescription>
+                  {!service.description?.startsWith("data:image") ? service.description : ""}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center mb-4">
@@ -155,7 +101,9 @@ const Servicos = () => {
                     <Clock className="h-4 w-4" />
                     <span className="text-sm">{service.duration}</span>
                   </div>
-                  <div className="text-2xl font-bold text-primary">{service.price}</div>
+                  <div className="text-2xl font-bold text-primary">
+                    R$ {service.price.toFixed(2)}
+                  </div>
                 </div>
                 <Link to="/agendamento">
                   <Button variant="default" className="w-full">
@@ -167,60 +115,52 @@ const Servicos = () => {
           ))}
         </div>
 
-        {/* Combos */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3 flex items-center justify-center gap-2">
-              <Sparkles className="h-8 w-8 text-secondary" />
-              Combos Especiais
-              <Sparkles className="h-8 w-8 text-secondary" />
-            </h2>
-            <p className="text-muted-foreground">
-              Economize com nossos pacotes combinados
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {combos.map((combo, index) => (
-              <Card key={index} className="border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">{combo.title}</CardTitle>
-                  <CardDescription>{combo.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-sm">{combo.duration}</span>
+        {combos.length > 0 && (
+          <div className="mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3 flex items-center justify-center gap-2">
+                <Sparkles className="h-8 w-8 text-secondary" />
+                Combos Especiais
+                <Sparkles className="h-8 w-8 text-secondary" />
+              </h2>
+              <p className="text-muted-foreground">Economize com nossos pacotes combinados</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {combos.map((combo) => (
+                <Card key={combo.id} className="border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{combo.name}</CardTitle>
+                    <CardDescription>{combo.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span className="text-sm">{combo.duration}</span>
+                        </div>
+                        <div className="text-xl font-bold text-secondary">
+                          R$ {combo.price.toFixed(2)}
+                        </div>
                       </div>
-                      <div className="text-xl font-bold text-secondary">{combo.price}</div>
+                      <Link to="/agendamento">
+                        <Button variant="gold" size="sm" className="w-full">
+                          Agendar Combo
+                        </Button>
+                      </Link>
                     </div>
-                    <Link to="/agendamento">
-                      <Button variant="gold" size="sm" className="w-full">
-                        Agendar Combo
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Combos */}
-        <div className="mb-12">
-          {/* ... (código existente dos combos) ... */}
-        </div> {/* <-- FIM DOS COMBOS */}
-
-
-        {/* NOVA SEÇÃO DE FORMULÁRIO DE COMENTÁRIOS */}
         <div className="mb-16">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-3">Deixe seu Comentário</h2>
-            <p className="text-muted-foreground">
-              Adoramos saber a sua opinião sobre nossos serviços!
-            </p>
+            <p className="text-muted-foreground">Adoramos saber a sua opinião sobre nossos serviços!</p>
           </div>
           <Card className="max-w-2xl mx-auto border-border bg-card">
             <CardHeader>
@@ -243,16 +183,7 @@ const Servicos = () => {
             </CardContent>
           </Card>
         </div>
-        {/* FIM DA NOVA SEÇÃO */}
 
-
-        {/* Depoimentos */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-center">O Que Nossas Clientes Dizem</h2>
-          {/* ... (código existente dos depoimentos) ... */}
-        </div>
-
-        {/* CTA */}
         <div className="text-center bg-gradient-rose-gold rounded-2xl p-8 md:p-12 shadow-glow">
           <h2 className="text-3xl font-bold text-white mb-4">
             Pronta para se sentir ainda mais linda?
