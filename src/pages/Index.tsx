@@ -76,11 +76,11 @@ const Index = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 Seu olhar{" "}
                 <span className="bg-gradient-rose-gold bg-clip-text text-transparent">
-                  Merece destaque
+                  merece destaque
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground">
-                Especialistas em design de sobrancelhas, micropigmentação e cuidados estéticos faciais em Pinheiros, São Paulo
+                Excelência em design de sobrancelhas com técnicas exclusivas e atendimento personalizado. Transformando olhares com sofisticação e elegância.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/agendamento">
