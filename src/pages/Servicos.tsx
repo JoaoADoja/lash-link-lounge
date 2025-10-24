@@ -28,7 +28,7 @@ const services = [
   },
   {
     title: "Depilação na Linha",
-    description: "Remoção precisa de pelos faciais\n\n",
+    description: "\nRemoção precisa de pelos faciais",
     price: "A partir de R$ 40",
     duration: "30 min",
     image: serviceDesign,
