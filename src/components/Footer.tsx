@@ -48,12 +48,10 @@ const Footer = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-
-                <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-
+                
                  <a
 
-              href="https://instagram.com"
+              href="https://www.instagram.com/cardoso_sobrancelhas?igsh=Y2Rqamx6YmdocnMx"
 
               target="_blank"
 
@@ -65,7 +63,7 @@ const Footer = () => {
 
               <Instagram className="h-5 w-5" />
 
-              <span>@cardososobrancelhas</span>
+              <span>@cardoso_sobrancelhas</span>
 
             </a>
 
@@ -89,7 +87,7 @@ const Footer = () => {
 
               <div className="text-sm">
 
-                <p className="font-medium text-foreground">Terça a Quinta</p>
+                <p className="font-medium text-foreground">Terça-Feira a Quinta-Feira</p>
 
                 <p>09h30 às 19h00</p>
 
