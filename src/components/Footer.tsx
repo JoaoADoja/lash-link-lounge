@@ -39,9 +39,9 @@ const Footer = () => {
 
                 <Phone className="h-5 w-5 text-primary flex-shrink-0" />
 
-                <a href="https://wa.me/5511999999999" className="text-sm hover:text-primary transition-colors">
+                <a href="https://wa.me/551197780-6048" className="text-sm hover:text-primary transition-colors">
 
-                  (11) 99999-9999
+                  (11) 97780-6048
 
                 </a>
 
@@ -51,11 +51,23 @@ const Footer = () => {
 
                 <Mail className="h-5 w-5 text-primary flex-shrink-0" />
 
-                <a href="mailto:contato@cardososobrancelhas.com" className="text-sm hover:text-primary transition-colors">
+                 <a
 
-                  contato@cardososobrancelhas.com
+              href="https://instagram.com"
 
-                </a>
+              target="_blank"
+
+              rel="noopener noreferrer"
+
+              className="inline-flex items-center space-x-2 text-primary hover:text-primary-glow transition-colors"
+
+            >
+
+              <Instagram className="h-5 w-5" />
+
+              <span>@cardososobrancelhas</span>
+
+            </a>
 
               </div>
 
