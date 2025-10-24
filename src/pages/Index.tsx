@@ -80,7 +80,7 @@ const Index = () => {
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground">
-                Excelência em design de sobrancelhas com técnicas exclusivas e atendimento personalizado. Transformando olhares com sofisticação e elegância.
+                Técnicas exclusivas e atendimento personalizado. Transforme seu visual com sofisticação e elegância.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/agendamento">
