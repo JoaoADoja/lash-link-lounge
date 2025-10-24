@@ -128,6 +128,7 @@ const Servicos = () => {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
             Nossos Serviços
+            
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Cuidamos de você com carinho e atenção. Cada tratamento é pensado para realçar o que há de mais bonito em você.
