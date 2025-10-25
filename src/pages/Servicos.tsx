@@ -152,7 +152,7 @@ const Servicos = () => {
               <CardContent>
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center space-x-2 text-muted-foreground">
-                    <Clock className="h-2 w-2" />
+                    <Clock className="h-4 w-4" />
                     <span className="text-sm">{service.duration}</span>
                   </div>
                   <div className="text-2xl font-bold text-primary">{service.price}</div>
