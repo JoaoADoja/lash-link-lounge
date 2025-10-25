@@ -33,7 +33,7 @@ const Contato = () => {
 
           {/* Informações de Contato (agora centralizadas) */}
           {/* Adicionei 'lg:max-w-lg' para limitar a largura em telas grandes */}
-          <div className="space-y-6 lg:max-w-lg w-full"> 
+          <div className="space-y-6 w-full">
             <Card className="shadow-soft border-border">
               <CardHeader>
                 <CardTitle>Informações de Contato</CardTitle>
