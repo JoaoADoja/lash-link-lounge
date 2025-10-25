@@ -1,4 +1,3 @@
-import Autoplay from "embla-carousel-autoplay";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -125,15 +124,7 @@ const Index = () => {
     </div>
 
     {/* Carrossel Automático */}
-    <Carousel
-      className="w-full max-w-6xl mx-auto"
-      plugins={[
-        Autoplay({
-          delay: 4000,
-          stopOnInteraction: false,
-        }),
-      ]}
-    >
+    <Carousel className="w-full max-w-6xl mx-auto">
       <CarouselContent className="-ml-4">
         {[
           {
