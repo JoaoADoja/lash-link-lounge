@@ -126,9 +126,9 @@ const Servicos = () => {
      <main className="container mx-auto px-4 pt-24 pb-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
-            Nossos Serviços
-          </h1>
+         <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent leading-snug pb-1">
+  Nossos Serviços
+</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Cuidamos de você com carinho e atenção. Cada tratamento é pensado para realçar o que há de mais bonito em você.
           </p>
