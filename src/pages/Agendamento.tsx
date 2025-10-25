@@ -324,7 +324,7 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
       <main className="container mx-auto px-4 pt-24 pb-12">
         {/* Header */}
         <div className="text-center mb-12 space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent leading-snug pb-3">
             Agende seu Horário
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
