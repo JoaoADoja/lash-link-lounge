@@ -133,6 +133,66 @@ const Index = () => {
     price: "R$ 70",
     image: serviceDesign,
   },
+   {
+            title: "Design com Henna",
+            description: "Design + coloração com henna para sobrancelhas mais marcantes",
+            price: "R$ 80",
+            image: serviceDesign,
+          },
+          {
+            title: "Depilação na Linha",
+            description: "Remoção precisa de pelos faciais",
+            price: "A partir de R$ 40",
+            image: serviceDesign,
+          },
+          {
+            title: "Lash Lifting",
+            description: "Curvatura e alongamento natural dos cílios",
+            price: "R$ 160",
+            image: serviceLashes,
+          },
+          {
+            title: "Brow Lamination",
+            description: "Laminação de sobrancelhas para um efeito disciplinado",
+            price: "R$ 160",
+            image: serviceDesign,
+          },
+          {
+            title: "Micropigmentação Blading Fio a Fio",
+            description: "Técnica realista que imita fios naturais",
+            price: "R$ 400",
+            image: serviceMicro,
+          },
+          {
+            title: "Micropigmentação Shadow",
+            description: "Efeito esfumado e sombreado nas sobrancelhas",
+            price: "R$ 450",
+            image: serviceMicro,
+          },
+          {
+            title: "Limpeza de Pele",
+            description: "Tratamento facial completo e revitalizante",
+            price: "R$ 120",
+            image: serviceDesign,
+          },
+          {
+            title: "Extensão de Cílios - Volume Brasileiro",
+            description: "Volume natural e elegante",
+            price: "R$ 140",
+            image: serviceLashes,
+          },
+          {
+            title: "Extensão de Cílios - Volume Egípcio",
+            description: "Volume dramático e impactante",
+            price: "R$ 160",
+            image: serviceLashes,
+          },
+          {
+            title: "Extensão de Cílios - Volume Médio",
+            description: "Equilíbrio entre natural e volumoso",
+            price: "R$ 160",
+            image: serviceLashes,
+          },
   // ... outros serviços
 ].map((service, index) => (
   <CarouselItem
