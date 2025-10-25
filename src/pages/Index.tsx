@@ -1,3 +1,4 @@
+import Autoplay from "embla-carousel-autoplay";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -113,57 +114,142 @@ const Index = () => {
 
       {/* Serviços em Destaque */}
       <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Serviços em Destaque
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Conheça nossos procedimentos mais procurados
-            </p>
-          </div>
+  <div className="container mx-auto px-4">
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        Nossos Serviços
+      </h2>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Conheça todos os nossos procedimentos e agende o seu favorito
+      </p>
+    </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {featuredServices.map((service, index) => (
-              <Card
-                key={index}
-                className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border group"
-              >
-                <div className="h-64 overflow-hidden">
-                  <img
-                    src={service.image}
-                    alt={service.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+    {/* Carrossel Automático */}
+    <Carousel
+      className="w-full max-w-6xl mx-auto"
+      plugins={[
+        Autoplay({
+          delay: 4000,
+          stopOnInteraction: false,
+        }),
+      ]}
+    >
+      <CarouselContent className="-ml-4">
+        {[
+          {
+            title: "Design de Sobrancelhas",
+            description: "Modelagem perfeita que realça sua beleza natural",
+            price: "R$ 70",
+            image: serviceDesign,
+          },
+          {
+            title: "Design com Henna",
+            description: "Design + coloração com henna para sobrancelhas mais marcantes",
+            price: "R$ 80",
+            image: serviceDesign,
+          },
+          {
+            title: "Depilação na Linha",
+            description: "Remoção precisa de pelos faciais",
+            price: "A partir de R$ 40",
+            image: serviceDesign,
+          },
+          {
+            title: "Lash Lifting",
+            description: "Curvatura e alongamento natural dos cílios",
+            price: "R$ 160",
+            image: serviceLashes,
+          },
+          {
+            title: "Brow Lamination",
+            description: "Laminação de sobrancelhas para um efeito disciplinado",
+            price: "R$ 160",
+            image: serviceDesign,
+          },
+          {
+            title: "Micropigmentação Blading Fio a Fio",
+            description: "Técnica realista que imita fios naturais",
+            price: "R$ 400",
+            image: serviceMicro,
+          },
+          {
+            title: "Micropigmentação Shadow",
+            description: "Efeito esfumado e sombreado nas sobrancelhas",
+            price: "R$ 450",
+            image: serviceMicro,
+          },
+          {
+            title: "Limpeza de Pele",
+            description: "Tratamento facial completo e revitalizante",
+            price: "R$ 120",
+            image: serviceDesign,
+          },
+          {
+            title: "Extensão de Cílios - Volume Brasileiro",
+            description: "Volume natural e elegante",
+            price: "R$ 140",
+            image: serviceLashes,
+          },
+          {
+            title: "Extensão de Cílios - Volume Egípcio",
+            description: "Volume dramático e impactante",
+            price: "R$ 160",
+            image: serviceLashes,
+          },
+          {
+            title: "Extensão de Cílios - Volume Médio",
+            description: "Equilíbrio entre natural e volumoso",
+            price: "R$ 160",
+            image: serviceLashes,
+          },
+        ].map((service, index) => (
+          <CarouselItem
+            key={index}
+            className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+          >
+            <Card className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border group">
+              <div className="h-64 overflow-hidden">
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle>{service.title}</CardTitle>
+                <CardDescription>{service.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-primary">
+                    {service.price}
+                  </span>
+                  <Link to="/agendamento">
+                    <Button variant="default" size="sm">
+                      Agendar
+                    </Button>
+                  </Link>
                 </div>
-                <CardHeader>
-                  <CardTitle>{service.title}</CardTitle>
-                  <CardDescription>{service.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-primary">{service.price}</span>
-                    <Link to="/agendamento">
-                      <Button variant="default" size="sm">
-                        Agendar
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+              </CardContent>
+            </Card>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
 
-          <div className="text-center">
-            <Link to="/servicos">
-              <Button variant="outline" size="lg">
-                Ver Todos os Serviços
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
+
+    <div className="text-center mt-8">
+      <Link to="/servicos">
+        <Button variant="outline" size="lg">
+          Ver Todos os Serviços
+          <ArrowRight className="ml-2 h-5 w-5" />
+        </Button>
+      </Link>
+    </div>
+  </div>
+</section>
 
       {/* Diferenciais */}
       <section className="py-16 md:py-24 bg-muted/50">
