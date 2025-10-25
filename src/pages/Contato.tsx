@@ -54,8 +54,8 @@ const Contato = () => {
                   <Phone className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div>
                     <p className="font-medium">Telefone</p>
-                    <a href="https://wa.me/5511999999999" className="text-muted-foreground text-sm hover:text-primary transition-colors">
-                      (11) 99999-9999
+                    <a href="wa.me/message/GGMYKGH7YKX6G1" className="text-muted-foreground text-sm hover:text-primary transition-colors">
+                      (11) 97780-6048
                     </a>
                   </div>
                 </div>
