@@ -59,17 +59,7 @@ const Contato = () => {
                     </a>
                   </div>
                 </div>
-                
-                <div className="flex items-start space-x-3">
-                  <Mail className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">E-mail</p>
-                    <a href="mailto:contato@cardososobrancelhas.com" className="text-muted-foreground text-sm hover:text-primary transition-colors">
-                      contato@cardososobrancelhas.com
-                    </a>
-                  </div>
-                </div>
-                
+                                               
                 <div className="flex items-start space-x-3">
                   <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div>
