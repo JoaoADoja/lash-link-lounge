@@ -85,8 +85,8 @@ const Contato = () => {
                   <Instagram className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div>
                     <p className="font-medium">Instagram</p>
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-primary transition-colors">
-                      @cardososobrancelhas
+                    <a href="https://www.instagram.com/cardoso_sobrancelhas/?igsh=Y2Rqamx6YmdocnMx#" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-primary transition-colors">
+                      @cardoso_sobrancelhas
                     </a>
                   </div>
                 </div>
