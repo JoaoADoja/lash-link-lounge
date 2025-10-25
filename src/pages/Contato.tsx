@@ -1,42 +1,19 @@
-import { Button } from "@/components/ui/button";
+// 👇 IMPORTS REMOVIDOS: Button, Input, Textarea, useState, toast
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Instagram } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";
-import { toast } from "sonner";
 
 const Contato = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Criar mensagem formatada para WhatsApp
-    const whatsappMessage = `Olá! Gostaria de entrar em contato.%0A%0ANome: ${formData.name}%0AEmail: ${formData.email}%0ATelefone: ${formData.phone}%0A%0AMensagem: ${formData.message}`;
-    
-    // Redirecionar para WhatsApp
-    window.open(`https://wa.me/5511999999999?text=${whatsappMessage}`, '_blank');
-    
-    toast.success("Redirecionando para o WhatsApp...");
-    
-    // Limpar formulário
-    setFormData({ name: "", email: "", phone: "", message: "" });
-  };
+  // 👇 REMOVIDO: const [formData, ...]
+  // 👇 REMOVIDO: const handleSubmit = (...)
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
       
       <main className="container mx-auto px-4 pt-24 pb-12">
-        {/* Header */}
+        {/* Header (sem alterações) */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
             Entre em Contato
@@ -46,77 +23,17 @@ const Contato = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Formulário */}
-          <Card className="shadow-soft border-border">
-            <CardHeader>
-              <CardTitle>Envie uma Mensagem</CardTitle>
-              <CardDescription>
-                Preencha o formulário e entraremos em contato o mais breve possível
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    Nome Completo
-                  </label>
-                  <Input
-                    id="name"
-                    placeholder="Seu nome"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    E-mail
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                    Telefone
-                  </label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="(11) 99999-9999"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    Mensagem
-                  </label>
-                  <Textarea
-                    id="message"
-                    placeholder="Conte-nos como podemos ajudar..."
-                    rows={5}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    required
-                  />
-                </div>
-                <Button type="submit" variant="hero" className="w-full">
-                  Enviar via WhatsApp
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+        {/* 👇 ALTERAÇÃO AQUI: 
+            Trocamos as classes 'grid lg:grid-cols-2' por 'flex justify-center' 
+            para centralizar o conteúdo restante.
+        */}
+        <div className="flex justify-center gap-8 mb-12">
 
-          {/* Informações de Contato */}
-          <div className="space-y-6">
+          {/* ===== BLOCO DO FORMULÁRIO FOI COMPLETAMENTE REMOVIDO DAQUI ===== */}
+
+          {/* Informações de Contato (agora centralizadas) */}
+          {/* Adicionei 'lg:max-w-lg' para limitar a largura em telas grandes */}
+          <div className="space-y-6 lg:max-w-lg w-full"> 
             <Card className="shadow-soft border-border">
               <CardHeader>
                 <CardTitle>Informações de Contato</CardTitle>
@@ -176,7 +93,7 @@ const Contato = () => {
               </CardContent>
             </Card>
 
-            {/* Mapa */}
+            {/* Mapa (sem alterações) */}
             <Card className="shadow-soft border-border">
               <CardHeader>
                 <CardTitle>Nossa Localização</CardTitle>
@@ -184,7 +101,7 @@ const Contato = () => {
               <CardContent>
                 <div className="aspect-video rounded-lg overflow-hidden">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.0977407079853!2d-46.69199!3d-23.5629!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDMzJzQ2LjQiUyA0NsKwNDEnMzEuMiJX!5e0!3m2!1spt-BR!2sbr!4v1234567890"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.0977407079853!2d-46.69199!3d-23.5629!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDMzJzQ2LjQiUyA0NsKwNDEnMzEuMiJX!5e0!3m2!1spt-BR!2sbr!4v1234567890" // Lembre-se de trocar este link pelo 'src' do Google Maps
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}
