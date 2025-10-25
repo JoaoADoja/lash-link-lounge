@@ -112,7 +112,7 @@ const combos = [
   },
   {
     title: "Combo 4",
-    description: "Lash Lifting + Brown Lamination",
+    description: "Lash Lifting + Brow Lamination",
     price: "R$ 280",
     duration: "2h",
   },
