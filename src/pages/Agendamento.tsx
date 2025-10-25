@@ -507,8 +507,8 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p className="font-medium">Terça a Sábado</p>
-                <p className="text-muted-foreground">09h30 às 19h00</p>
+                <p className="font-medium">Terça-feira à Sábado-feira</p>
+                <p className="text-muted-foreground">09:30 às 19:00</p>
               </CardContent>
             </Card>
 
