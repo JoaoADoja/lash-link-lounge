@@ -173,45 +173,37 @@ const Servicos = () => {
 </div>
 
         {/* Combos */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3 flex items-center justify-center gap-2">
-              <Sparkles className="h-8 w-8 text-secondary" />
-              Combos Especiais
-              <Sparkles className="h-8 w-8 text-secondary" />
-            </h2>
-            <p className="text-muted-foreground">
-              Economize com nossos pacotes combinados
-            </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  {combos.map((combo, index) => (
+    <Card
+      key={index}
+      className="flex flex-col justify-between h-full border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card"
+    >
+      {/* Cabeçalho */}
+      <CardHeader className="flex-grow">
+        <CardTitle className="text-lg text-center">{combo.title}</CardTitle>
+        <CardDescription className="text-center">{combo.description}</CardDescription>
+      </CardHeader>
+
+      {/* Conteúdo */}
+      <CardContent className="flex flex-col justify-end flex-grow">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm">{combo.duration}</span>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {combos.map((combo, index) => (
-              <Card key={index} className="border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">{combo.title}</CardTitle>
-                  <CardDescription>{combo.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-sm">{combo.duration}</span>
-                      </div>
-                      <div className="text-xl font-bold text-secondary">{combo.price}</div>
-                    </div>
-                    <Link to="/agendamento">
-                      <Button variant="gold" size="sm" className="w-full">
-                        Agendar Combo
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <div className="text-xl font-bold text-secondary">{combo.price}</div>
         </div>
+
+        <Link to="/agendamento">
+          <Button variant="gold" size="sm" className="w-full">
+            Agendar Combo
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
+  ))}
+</div>
 
         {/* Combos */}
         <div className="mb-12">
