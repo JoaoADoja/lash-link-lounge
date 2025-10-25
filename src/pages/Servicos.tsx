@@ -123,7 +123,7 @@ const Servicos = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
       
-     <main className="container mx-auto px-4 pt-24 pb-12">
+     <main className="container mx-auto px-2 pt-12 pb-12">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-rose-gold bg-clip-text text-transparent">
