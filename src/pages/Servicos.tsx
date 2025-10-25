@@ -135,37 +135,42 @@ const Servicos = () => {
         </div>
 
         {/* Serviços Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {services.map((service, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-glow transition-all duration-300 border-border">
-              <div className="h-48 overflow-hidden">
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-xl">{service.title}</CardTitle>
-                <CardDescription>{service.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center space-x-2 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span className="text-sm">{service.duration}</span>
-                  </div>
-                  <div className="text-2xl font-bold text-primary">{service.price}</div>
-                </div>
-                <Link to="/agendamento">
-                  <Button variant="default" className="w-full">
-                    Agendar Agora
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+  {services.map((service, index) => (
+    <Card
+      key={index}
+      className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+    >
+      {/* Imagem */}
+      <div className="h-48 w-full overflow-hidden">
+        <img
+          src={service.image}
+          alt={service.title}
+          className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+
+      {/* Conteúdo */}
+      <div className="flex flex-col flex-grow p-4 text-center">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          {service.title}
+        </h3>
+        <p className="text-sm text-gray-600 flex-grow">
+          {service.description}
+        </p>
+
+        <div className="mt-4">
+          <p className="text-pink-600 font-bold mb-2">{service.price}</p>
+          <Link to="/agendamento">
+            <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-4 rounded-md">
+              Agendar Agora
+            </Button>
+          </Link>
         </div>
+      </div>
+    </Card>
+  ))}
+</div>
 
         {/* Combos */}
         <div className="mb-12">
