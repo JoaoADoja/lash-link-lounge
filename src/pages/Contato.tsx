@@ -27,7 +27,7 @@ const Contato = () => {
             Trocamos as classes 'grid lg:grid-cols-2' por 'flex justify-center' 
             para centralizar o conteúdo restante.
         */}
-        <div className="flex justify-center gap-8 mb-12">
+        <div className="grid grid-cols-1 gap-8 mb-12">
 
           {/* ===== BLOCO DO FORMULÁRIO FOI COMPLETAMENTE REMOVIDO DAQUI ===== */}
 
