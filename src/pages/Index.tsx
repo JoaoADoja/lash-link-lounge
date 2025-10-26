@@ -44,23 +44,23 @@ const Index = () => {
   const benefits = [
     {
       icon: Award,
-      title: "Profissionais Qualificadas",
-      description: "Equipe especializada e certificada",
+      title: "Sua Beleza, Cuidada por Quem Entende",
+      description: "Profissional certificada, 100% dedicada ao seu resultado.",
     },
     {
       icon: Sparkles,
-      title: "Produtos Premium",
-      description: "Utilizamos apenas produtos de alta qualidade",
+      title: "Resultados com Produtos de Elite",
+      description: "Uso exclusivo de produtos premium e de alta performance.",
     },
     {
       icon: Heart,
-      title: "Atendimento Personalizado",
-      description: "Cuidado individual para cada cliente",
+      title: "Cuidado Personalizado, Aqui a Estrela é Você",
+      description: "Atenção individual e serviços criados sob medida para você.",
     },
     {
       icon: Clock,
-      title: "Horários Flexíveis",
-      description: "Agendamento online rápido e prático",
+      title: "Flexibilidade para Sua Agenda Seu Tempo é Valioso",
+      description: "Agendamento rápido e horários que respeitam e acolhem a sua rotina.",
     },
   ];
 
