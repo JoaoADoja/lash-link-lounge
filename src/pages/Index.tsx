@@ -288,10 +288,10 @@ const Index = () => {
           <Card className="bg-gradient-rose-gold shadow-glow border-0">
             <CardContent className="py-12 md:py-16 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Vamos realçar o melhor de você?
+                Invista em Sua Melhor Versão
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-                Agende seu horário agora e transforme seu olhar com nossos serviços especializados
+                Sua confiança começa aqui. Agende seu horário e sinta a diferença de um cuidado de alto padrão.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/agendamento">
