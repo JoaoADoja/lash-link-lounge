@@ -288,7 +288,7 @@ const Index = () => {
           <Card className="bg-gradient-rose-gold shadow-glow border-0">
             <CardContent className="py-12 md:py-16 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Pronta para se Sentir Ainda Mais Linda?
+                Vamos realçar o melhor de você?
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
                 Agende seu horário agora e transforme seu olhar com nossos serviços especializados
