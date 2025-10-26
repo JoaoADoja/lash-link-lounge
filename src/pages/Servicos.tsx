@@ -21,7 +21,7 @@ const services = [
   },
   {
     title: "Design com Henna",
-    description: "Além do formato ideal, a henna colore e preenche e define as sobrancelhas.",
+    description: "Além do formato ideal, a henna colore, preenche e define as sobrancelhas.",
     price: "R$ 80",
     duration: "1h",
     image: serviceDesign,
@@ -42,7 +42,7 @@ const services = [
   },
   {
     title: "Brow Lamination",
-    description: "Alinha e modela os fios, deixando as sobrancelhas cheias e uniformes",
+    description: "Técnica que alinha os pelos, garantindo sobrancelhas naturalmente cheias, uniformes e "penteadas".",
     price: "R$ 160",
     duration: "1h10min",
     image: serviceDesign,
