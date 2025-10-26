@@ -23,7 +23,7 @@ const Index = () => {
   const featuredServices = [
     {
       title: "Design de Sobrancelhas",
-      description: "Técnica m que valoriza o formato do rosto e realça o olhar com harmonia",
+      description: "Técnica que valoriza o formato do rosto e realça o olhar com harmonia",
       price: "R$ 70",
       image: serviceDesign,
     },
@@ -129,7 +129,7 @@ const Index = () => {
         {[
   {
     title: "Design de Sobrancelhas",
-    description: "Técnica m que valoriza o formato do rosto e realça o olhar com harmonia",
+    description: "Técnica que valoriza o formato do rosto e realça o olhar com harmonia",
     price: "R$ 70",
     image: serviceDesign,
   },
