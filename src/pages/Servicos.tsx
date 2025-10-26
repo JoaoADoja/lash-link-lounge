@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 const services = [
   {
     title: "Design de Sobrancelhas",
-    description: "Modelagem perfeita que realça sua beleza natural",
+    description: "Técnica m que valoriza o formato do rosto e realça o olhar com harmonia",
     price: "R$ 70",
     duration: "40 min",
     image: serviceDesign,
