@@ -23,7 +23,7 @@ const Index = () => {
   const featuredServices = [
     {
       title: "Design de Sobrancelhas",
-      description: "Técnica que modela as sobrancelhas de acordo com o formato do rosto, realçando a expressão natural e deixando o olhar mais harmonioso e definido",
+      description: "Técnica m que valoriza o formato do rosto e realça o olhar com harmonia",
       price: "R$ 70",
       image: serviceDesign,
     },
@@ -129,7 +129,7 @@ const Index = () => {
         {[
   {
     title: "Design de Sobrancelhas",
-    description: "Técnica que modela as sobrancelhas de acordo com o formato do rosto, realçando a expressão natural e deixando o olhar mais harmonioso e definido",
+    description: "Técnica m que valoriza o formato do rosto e realça o olhar com harmonia",
     price: "R$ 70",
     image: serviceDesign,
   },
