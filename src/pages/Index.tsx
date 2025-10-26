@@ -50,7 +50,7 @@ const Index = () => {
     {
       icon: Sparkles,
       title: "Resultados com Produtos de Elite",
-      description: "Uso exclusivo de produtos premium e de alta performance.",
+      description: "Valor que se vê e sente: Produtos de alto padrão e qualidade em seu tratamento.",
     },
     {
       icon: Heart,
