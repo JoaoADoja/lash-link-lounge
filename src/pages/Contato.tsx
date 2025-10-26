@@ -19,7 +19,7 @@ const Contato = () => {
             Entre em Contato
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Seu momento de beleza começa aqui. Conte-nos o que você deseja e reserve seu horário.
+            Tire suas dúvidas ou agende agora. Estamos aqui para te ouvir e começar sua transformação.
           </p>
         </div>
 
