@@ -328,7 +328,7 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
             Agende seu Horário
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Escolha o serviço, data e horário de sua preferência
+            Simples e rápido! Escolha o serviço e garanta seu momento.
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <CalendarIcon className="h-4 w-4" />
