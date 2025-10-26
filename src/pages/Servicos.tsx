@@ -42,7 +42,7 @@ const services = [
   },
   {
     title: "Brow Lamination",
-    description: "Técnica que alinha os pelos, garantindo sobrancelhas naturalmente cheias, uniformes e "penteadas".",
+    description: "Técnica que alinha os pelos, garantindo sobrancelhas naturalmente cheias, uniformes e penteadas.",
     price: "R$ 160",
     duration: "1h10min",
     image: serviceDesign,
