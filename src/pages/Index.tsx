@@ -44,7 +44,7 @@ const Index = () => {
   const benefits = [
     {
       icon: Award,
-      title: "Sua Beleza, Cuidada por Quem Entende",
+      title: "Sua Beleza cuidada por Quem Entende",
       description: "Profissional certificada, 100% dedicada ao seu resultado.",
     },
     {
@@ -59,7 +59,7 @@ const Index = () => {
     },
     {
       icon: Clock,
-      title: "Flexibilidade para Sua Agenda Seu Tempo é Valioso",
+      title: "Flexibilidade e Agilidade Seu Tempo é Valioso",
       description: "Agendamento rápido e horários que respeitam e acolhem a sua rotina.",
     },
   ];
