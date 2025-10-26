@@ -129,7 +129,7 @@ const Index = () => {
         {[
   {
     title: "Design de Sobrancelhas",
-    description: "Modelagem perfeita que realça sua beleza natural",
+    description: "Técnica que modela as sobrancelhas de acordo com o formato do rosto, realçando a expressão natural e deixando o olhar mais harmonioso e definido",
     price: "R$ 70",
     image: serviceDesign,
   },
