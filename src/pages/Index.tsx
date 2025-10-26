@@ -262,7 +262,7 @@ const Index = () => {
               Por Que Escolher a Cardoso?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Mais que um Serviço: Sua Experiência de Beleza Exclusiva.
+              Seu momento de beleza, transformado em uma experiência única.
             </p>
           </div>
 
