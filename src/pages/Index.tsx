@@ -44,22 +44,22 @@ const Index = () => {
   const benefits = [
     {
       icon: Award,
-      title: "Sua Beleza cuidada por Quem Entende",
+      title: "Sua beleza cuidada por quem entende",
       description: "Profissional certificada, 100% dedicada ao seu resultado.",
     },
     {
       icon: Sparkles,
-      title: "Resultados com Produtos de Elite",
+      title: "Resultados com produtos de elite",
       description: "Valor que se vê e sente: Produtos de alto padrão e qualidade em seu tratamento.",
     },
     {
       icon: Heart,
-      title: "Cuidado Personalizado, Aqui a Estrela é Você",
+      title: "Cuidado personalizado, aqui a estrela é você",
       description: "Atenção individual e serviços criados sob medida para você.",
     },
     {
       icon: Clock,
-      title: "Flexibilidade e Agilidade Seu Tempo é Valioso",
+      title: "Flexibilidade e agilidade seu tempo é valioso",
       description: "Agendamento rápido e horários que respeitam e acolhem a sua rotina.",
     },
   ];
@@ -246,7 +246,7 @@ const Index = () => {
     <div className="text-center mt-8">
       <Link to="/servicos">
         <Button variant="outline" size="lg">
-          Ver Todos os Serviços
+          Ver todos os serviços
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </Link>
@@ -259,7 +259,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Por Que Escolher a Cardoso?
+              Por que escolher a Cardoso?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Seu momento de beleza, transformado em uma experiência única.
@@ -288,7 +288,7 @@ const Index = () => {
           <Card className="bg-gradient-rose-gold shadow-glow border-0">
             <CardContent className="py-12 md:py-16 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Invista em Sua Melhor Versão
+                Invista em sua melhor versão
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
                 Sua confiança começa aqui. Agende seu horário e sinta a diferença de um cuidado de alto padrão.
