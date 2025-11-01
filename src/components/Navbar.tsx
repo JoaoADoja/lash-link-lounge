@@ -62,9 +62,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent">
-              Cardoso Sobrancelhas
-            </div>
+           <div className="text-2xl font-bold bg-gradient-rose-gold bg-clip-text text-transparent font-[Playfair_Display]">
+          Cardoso Sobrancelhas
+          </div>
           </Link>
 
           {/* Desktop Navigation */}
