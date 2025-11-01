@@ -48,7 +48,7 @@ const Contato = () => {
         <div>
           <p className="font-medium">Telefone</p>
           <a
-  href="https://wa.me/message/GGMYKGH7YKX6G1"
+  href="https://wa.me/5511977806048"
   target="_blank"
   rel="noopener noreferrer"
   className="text-muted-foreground text-sm hover:text-primary transition-colors"
