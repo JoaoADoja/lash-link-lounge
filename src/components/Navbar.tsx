@@ -93,7 +93,7 @@ const Navbar = () => {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://wa.me/5511977806048"
+                href="https://wa.me/5511999999999"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -167,7 +167,7 @@ const Navbar = () => {
             ))}
             <div className="flex flex-col space-y-2 pt-2">
               <a
-                href="https://wa.me/5511977806048"
+                href="https://wa.me/5511999999999"
                 target="_blank"
                 rel="noopener noreferrer"
               >
