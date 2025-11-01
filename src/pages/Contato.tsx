@@ -81,6 +81,23 @@ const Contato = () => {
           </a>
         </div>
       </div>
+
+      <div className="flex items-start space-x-3">
+  <MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+  <div>
+    <p className="font-medium">Avaliação</p>
+    <a
+      href="https://share.google/0SazLm4GoH8R3ZdB0"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-block mt-1"
+    >
+      <button className="bg-primary text-white text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors">
+        Deixe aqui sua avaliação
+      </button>
+    </a>
+  </div>
+</div>
     </CardContent>
   </Card>
 
