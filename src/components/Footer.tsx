@@ -61,11 +61,14 @@ const Footer = () => {
 
                 <Phone className="h-5 w-5 text-primary flex-shrink-0" />
 
-                <a href="https://wa.me/551197780-6048" className="text-sm hover:text-primary transition-colors">
-
-                  (11) 97780-6048
-
-                </a>
+               <a
+              href="https://wa.me/5511977806048"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm hover:text-primary transition-colors"
+              >
+              (11) 97780-6048
+              </a>
 
               </div>
 
