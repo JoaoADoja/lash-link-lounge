@@ -93,7 +93,7 @@ const Contato = () => {
       Deixe aqui sua avaliação
     </button>
   </a>
-</div
+</div>
     </CardContent>
   </Card>
 
