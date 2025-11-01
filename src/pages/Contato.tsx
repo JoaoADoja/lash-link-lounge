@@ -48,7 +48,7 @@ const Contato = () => {
         <div>
           <p className="font-medium">Telefone</p>
           <a
-            href="wa.me/message/GGMYKGH7YKX6G1"
+            href="https://wa.me/message/GGMYKGH7YKX6G1"
             className="text-muted-foreground text-sm hover:text-primary transition-colors"
           >
             (11) 97780-6048
