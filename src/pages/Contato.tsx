@@ -85,7 +85,7 @@ const Contato = () => {
 {/* Botão de Avaliação */}
 <div className="flex justify-start mt-2">
   <a
-    href="https://share.google/miGFJ6dlpGGBXjxUf"
+    href="https://search.google.com/local/writereview?placeid=ChIJ9xyE7M1XzpQR5R5wn7QS3eM"
     target="_blank"
     rel="noopener noreferrer"
   >
