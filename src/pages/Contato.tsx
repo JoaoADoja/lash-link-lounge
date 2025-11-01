@@ -81,11 +81,11 @@ const Contato = () => {
           </a>
         </div>
       </div>
-
-     {/* Botão de Avaliação */}
+      
+{/* Botão de Avaliação */}
 <div className="flex justify-start mt-2">
   <a
-    href="https://share.google/0SazLm4GoH8R3ZdB0"
+    href="https://share.google/miGFJ6dlpGGBXjxUf"
     target="_blank"
     rel="noopener noreferrer"
   >
