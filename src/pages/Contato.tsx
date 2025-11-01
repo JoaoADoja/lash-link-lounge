@@ -61,7 +61,7 @@ const Contato = () => {
         <div>
           <p className="font-medium">Horário de Funcionamento</p>
           <p className="text-muted-foreground text-sm">
-            Terça-Feira à Quinta-Feira<br />
+            Terça-Feira à Sábado<br />
             09h30 às 19h00
           </p>
         </div>
