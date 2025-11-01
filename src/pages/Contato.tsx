@@ -80,10 +80,8 @@ const Contato = () => {
             @cardoso_sobrancelhas
           </a>
         </div>
-      </div>
-
-      {/* Botão de Avaliação */}
-<div className="flex justify-center mt-4">
+        
+     <div className="flex justify-center mt-4">
   <a
     href="https://g.page/r/CfMuI7v6oGpkEAE/review"
     target="_blank"
@@ -94,8 +92,7 @@ const Contato = () => {
     </button>
   </a>
 </div>
-      
-</div>
+        
     </CardContent>
   </Card>
 
