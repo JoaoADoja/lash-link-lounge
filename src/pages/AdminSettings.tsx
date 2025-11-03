@@ -24,7 +24,7 @@ interface Service {
   is_combo: boolean;
   is_active: boolean;
   display_order: number;
-  image?: string | null;
+  image_url?: string | null;
 }
 
 interface Announcement {
@@ -55,10 +55,12 @@ const AdminSettings = () => {
     reason: ''
   });
   const [serviceImage, setServiceImage] = useState<string | null>(null);
+  const [serviceImageFile, setServiceImageFile] = useState<File | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setServiceImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setServiceImage(reader.result as string);
@@ -122,7 +124,33 @@ const AdminSettings = () => {
 
   const saveService = async (service: Partial<Service>) => {
     try {
-      const serviceData = { ...service, image: serviceImage }; // adiciona a imagem
+      let image_url = service.image_url;
+
+      // Se há uma nova imagem para fazer upload
+      if (serviceImageFile) {
+        const fileExt = serviceImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        // Upload da imagem para o storage
+        const { error: uploadError } = await supabase.storage
+          .from('service-images')
+          .upload(filePath, serviceImageFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Gera URL pública
+        const { data: { publicUrl } } = supabase.storage
+          .from('service-images')
+          .getPublicUrl(filePath);
+
+        image_url = publicUrl;
+      }
+
+      const serviceData = { ...service, image_url };
 
       if (service.id) {
         const { id, ...updateData } = serviceData;
@@ -142,10 +170,12 @@ const AdminSettings = () => {
       }
 
       setEditingService(null);
-      setServiceImage(null); // limpa após salvar
+      setServiceImage(null);
+      setServiceImageFile(null);
       loadData();
-    } catch (error) {
-      toast.error("Erro ao salvar serviço");
+    } catch (error: any) {
+      console.error("Erro ao salvar serviço:", error);
+      toast.error(error.message || "Erro ao salvar serviço");
     }
   };
 
@@ -314,7 +344,8 @@ const AdminSettings = () => {
                         is_active: true,
                         display_order: services.length + 1
                       });
-                      setServiceImage(null); // limpa imagem ao criar novo serviço
+                      setServiceImage(null);
+                      setServiceImageFile(null);
                     }}>
                       <Plus className="mr-2 h-4 w-4" />
                       Novo Serviço
@@ -325,10 +356,10 @@ const AdminSettings = () => {
                   {services.map((service) => (
                     <Card key={service.id} className="p-5 hover:shadow-soft transition-shadow border-border/50">
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                        <div className="md:col-span-2 flex items-center gap-4">
-                          {service.image && (
+                      <div className="md:col-span-2 flex items-center gap-4">
+                          {service.image_url && (
                             <img
-                              src={service.image}
+                              src={service.image_url}
                               alt={service.name}
                               className="w-16 h-16 object-cover rounded-md border"
                             />
@@ -357,7 +388,8 @@ const AdminSettings = () => {
                         <div className="flex gap-2 justify-end">
                           <Button variant="outline" size="sm" onClick={() => {
                             setEditingService(service);
-                            setServiceImage(service.image || null); // carrega imagem existente
+                            setServiceImage(service.image_url || null);
+                            setServiceImageFile(null);
                           }}>
                             Editar
                           </Button>
@@ -461,7 +493,11 @@ const AdminSettings = () => {
                     </div>
 
                     <div className="flex gap-2 justify-end">
-                      <Button variant="outline" onClick={() => { setEditingService(null); setServiceImage(null); }}>Cancelar</Button>
+                      <Button variant="outline" onClick={() => { 
+                        setEditingService(null); 
+                        setServiceImage(null); 
+                        setServiceImageFile(null);
+                      }}>Cancelar</Button>
                       <Button onClick={() => saveService(editingService)}>Salvar <Save className="ml-2 h-4 w-4" /></Button>
                     </div>
                   </CardContent>

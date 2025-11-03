@@ -158,6 +158,7 @@ export type Database = {
           display_order: number
           duration: string
           id: string
+          image_url: string | null
           is_active: boolean
           is_combo: boolean
           name: string
@@ -170,6 +171,7 @@ export type Database = {
           display_order?: number
           duration: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_combo?: boolean
           name: string
@@ -182,6 +184,7 @@ export type Database = {
           display_order?: number
           duration?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_combo?: boolean
           name?: string
