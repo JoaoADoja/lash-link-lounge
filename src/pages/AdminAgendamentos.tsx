@@ -9,7 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Calendar, Clock, Loader2, LogOut, User, Phone, Mail, Settings } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface Appointment {
@@ -176,7 +176,7 @@ const AdminAgendamentos = () => {
                           <div className="flex items-center gap-6 flex-wrap bg-muted/30 p-3 rounded-lg">
                             <span className="flex items-center gap-2 text-base font-medium">
                               <Calendar className="h-5 w-5 text-primary" />
-                              {format(new Date(appointment.appointment_date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
+                              {format(parseISO(appointment.appointment_date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
                             </span>
                             <span className="flex items-center gap-2 text-base font-medium">
                               <Clock className="h-5 w-5 text-primary" />

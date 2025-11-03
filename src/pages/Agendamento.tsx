@@ -195,7 +195,9 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
       toast.error("Você precisa estar logado para fazer um agendamento");
       navigate("/auth");
       return;
@@ -241,7 +243,7 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
       const { error: dbError } = await supabase
         .from("appointments")
         .insert({
-          user_id: user.id,
+          user_id: session.user.id,
           professional_id: professionalData.user_id,
           client_name: formData.name,
           client_email: formData.email,
