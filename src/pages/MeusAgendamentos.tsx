@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Calendar, Clock, Loader2, LogOut, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface Appointment {
@@ -212,7 +212,7 @@ const MeusAgendamentos = () => {
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             {format(
-                              new Date(appointment.appointment_date),
+                              parseISO(appointment.appointment_date),
                               "dd 'de' MMMM 'de' yyyy",
                               { locale: ptBR }
                             )}
