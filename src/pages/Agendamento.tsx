@@ -212,6 +212,59 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
     const dateStr = date.toLocaleDateString('pt-BR');
     
     try {
+      toast.loading("Verificando disponibilidade...");
+
+      // 🔹 VALIDAÇÃO DE CONFLITO NO BACKEND
+      const appointmentDateStr = date.toISOString().split('T')[0];
+      
+      // Buscar duração do serviço selecionado
+      if (!selectedService) {
+        toast.dismiss();
+        toast.error("Serviço não encontrado");
+        return;
+      }
+
+      const serviceDuration = convertDurationToMinutes(selectedService.duration);
+      const requestedSlots = getTimeSlots(formData.time, serviceDuration);
+
+      // Buscar agendamentos confirmados no mesmo dia
+      const { data: existingAppointments, error: checkError } = await supabase
+        .from("appointments")
+        .select("appointment_time, service")
+        .eq("appointment_date", appointmentDateStr)
+        .eq("status", "confirmed");
+
+      if (checkError) {
+        console.error('Error checking appointments:', checkError);
+        toast.dismiss();
+        toast.error("Erro ao verificar disponibilidade");
+        return;
+      }
+
+      // Verificar conflitos
+      let hasConflict = false;
+      for (const appt of existingAppointments || []) {
+        const apptService = services.find(s => s.name === appt.service);
+        if (apptService) {
+          const apptDuration = convertDurationToMinutes(apptService.duration);
+          const occupiedSlots = getTimeSlots(appt.appointment_time, apptDuration);
+          
+          // Verificar se há interseção de horários
+          const conflict = requestedSlots.some(slot => occupiedSlots.includes(slot));
+          if (conflict) {
+            hasConflict = true;
+            break;
+          }
+        }
+      }
+
+      if (hasConflict) {
+        toast.dismiss();
+        toast.error("Este horário já está ocupado. Por favor, escolha outro horário.");
+        return;
+      }
+
+      toast.dismiss();
       toast.loading("Salvando agendamento...");
 
       // Get the first professional to assign this appointment
@@ -238,7 +291,7 @@ const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
           client_email: formData.email,
           client_phone: formData.phone,
           service: selectedService?.name || formData.service,
-          appointment_date: date.toISOString().split('T')[0],
+          appointment_date: appointmentDateStr,
           appointment_time: formData.time,
           observations: formData.observations || null,
           status: "confirmed"

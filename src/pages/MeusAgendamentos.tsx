@@ -256,6 +256,66 @@ const MeusAgendamentos = () => {
     try {
       const dateStr = newDate.toISOString().split("T")[0];
 
+      // 🔹 VALIDAÇÃO DE CONFLITO NO BACKEND
+      // Buscar duração do serviço
+      const { data: serviceData } = await supabase
+        .from("services")
+        .select("duration")
+        .eq("name", selectedAppointment.service)
+        .single();
+
+      if (!serviceData) {
+        toast.error("Serviço não encontrado");
+        setRescheduling(false);
+        return;
+      }
+
+      const serviceDuration = convertDurationToMinutes(serviceData.duration);
+      const requestedSlots = getTimeSlots(newTime, serviceDuration);
+
+      // Buscar agendamentos confirmados no mesmo dia (exceto o atual)
+      const { data: existingAppointments, error: checkError } = await supabase
+        .from("appointments")
+        .select("appointment_time, service")
+        .eq("appointment_date", dateStr)
+        .eq("status", "confirmed")
+        .neq("id", selectedAppointment.id);
+
+      if (checkError) {
+        console.error('Error checking appointments:', checkError);
+        toast.error("Erro ao verificar disponibilidade");
+        setRescheduling(false);
+        return;
+      }
+
+      // Buscar todas as durações dos serviços
+      const { data: allServices } = await supabase
+        .from("services")
+        .select("name, duration");
+
+      // Verificar conflitos
+      let hasConflict = false;
+      for (const appt of existingAppointments || []) {
+        const apptService = allServices?.find(s => s.name === appt.service);
+        if (apptService) {
+          const apptDuration = convertDurationToMinutes(apptService.duration);
+          const occupiedSlots = getTimeSlots(appt.appointment_time, apptDuration);
+          
+          // Verificar se há interseção de horários
+          const conflict = requestedSlots.some(slot => occupiedSlots.includes(slot));
+          if (conflict) {
+            hasConflict = true;
+            break;
+          }
+        }
+      }
+
+      if (hasConflict) {
+        toast.error("Este horário já está ocupado. Por favor, escolha outro horário.");
+        setRescheduling(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("appointments")
         .update({
