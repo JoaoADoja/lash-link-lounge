@@ -6,10 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Calendar, Clock, Loader2, LogOut, Plus } from "lucide-react";
+import { Calendar, Clock, Loader2, LogOut, Plus, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Appointment {
   id: string;
@@ -29,6 +32,18 @@ const MeusAgendamentos = () => {
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [userName, setUserName] = useState("");
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [newDate, setNewDate] = useState<Date | undefined>(undefined);
+  const [newTime, setNewTime] = useState<string>("");
+  const [availableHours, setAvailableHours] = useState<string[]>([]);
+  const [rescheduling, setRescheduling] = useState(false);
+
+  const allAvailableHours = [
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00"
+  ];
 
   useEffect(() => {
     checkUser();
@@ -147,6 +162,139 @@ const MeusAgendamentos = () => {
     }
   };
 
+  // 🔹 Abrir dialog de reagendamento
+  const handleOpenReschedule = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setNewDate(parseISO(appointment.appointment_date));
+    setNewTime(appointment.appointment_time);
+    setRescheduleDialogOpen(true);
+    loadAvailableHours(parseISO(appointment.appointment_date));
+  };
+
+  // 🔹 Carregar horários disponíveis
+  const loadAvailableHours = async (selectedDate: Date) => {
+    if (!selectedDate) {
+      setAvailableHours(allAvailableHours);
+      return;
+    }
+
+    try {
+      const dateStr = selectedDate.toISOString().split("T")[0];
+
+      const { data: appointments, error } = await supabase
+        .from("appointments")
+        .select("appointment_time, service")
+        .eq("appointment_date", dateStr)
+        .eq("status", "confirmed");
+
+      if (error) throw error;
+
+      const { data: services } = await supabase
+        .from("services")
+        .select("name, duration");
+
+      const blockedTimes: string[] = [];
+
+      appointments?.forEach((appt) => {
+        const service = services?.find((s) => s.name === appt.service);
+        if (!service) return;
+
+        const duration = convertDurationToMinutes(service.duration);
+        const startTime = appt.appointment_time;
+
+        const occupiedSlots = getTimeSlots(startTime, duration);
+        blockedTimes.push(...occupiedSlots);
+      });
+
+      const filteredHours = allAvailableHours.filter(
+        (hour) => !blockedTimes.includes(hour)
+      );
+
+      setAvailableHours(filteredHours);
+    } catch (error) {
+      console.error("Erro ao carregar horários disponíveis:", error);
+      setAvailableHours(allAvailableHours);
+    }
+  };
+
+  // 🕒 Converter duração em minutos
+  const convertDurationToMinutes = (duration: string): number => {
+    const hours = duration.match(/(\d+)h/);
+    const minutes = duration.match(/(\d+)min/);
+    return (hours ? parseInt(hours[1]) * 60 : 0) + (minutes ? parseInt(minutes[1]) : 0);
+  };
+
+  // 📅 Gerar slots de 30min
+  const getTimeSlots = (startTime: string, durationMinutes: number): string[] => {
+    const slots: string[] = [];
+    const [hour, minute] = startTime.split(":").map(Number);
+    const start = new Date();
+    start.setHours(hour, minute, 0, 0);
+
+    const end = new Date(start.getTime() + durationMinutes * 60000);
+
+    let current = new Date(start);
+    while (current < end) {
+      const hh = current.getHours().toString().padStart(2, "0");
+      const mm = current.getMinutes().toString().padStart(2, "0");
+      slots.push(`${hh}:${mm}`);
+      current.setMinutes(current.getMinutes() + 30);
+    }
+
+    return slots;
+  };
+
+  // 🔹 Confirmar reagendamento
+  const handleConfirmReschedule = async () => {
+    if (!selectedAppointment || !newDate || !newTime) {
+      toast.error("Por favor, selecione data e horário");
+      return;
+    }
+
+    setRescheduling(true);
+
+    try {
+      const dateStr = newDate.toISOString().split("T")[0];
+
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          appointment_date: dateStr,
+          appointment_time: newTime,
+          status: "pending"
+        })
+        .eq("id", selectedAppointment.id);
+
+      if (error) throw error;
+
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt.id === selectedAppointment.id
+            ? { ...appt, appointment_date: dateStr, appointment_time: newTime, status: "pending" }
+            : appt
+        )
+      );
+
+      toast.success("Reagendamento realizado com sucesso!");
+      setRescheduleDialogOpen(false);
+      setSelectedAppointment(null);
+      setNewDate(undefined);
+      setNewTime("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao reagendar o agendamento.");
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
+  // 🔹 Atualizar horários quando a data muda
+  useEffect(() => {
+    if (newDate && rescheduleDialogOpen) {
+      loadAvailableHours(newDate);
+    }
+  }, [newDate, rescheduleDialogOpen]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -227,15 +375,24 @@ const MeusAgendamentos = () => {
                       <div className="flex flex-col items-end gap-2">
                         {getStatusBadge(appointment.status)}
 
-                        {/* Botão de cancelar com confirmação */}
                         {appointment.status !== "cancelled" && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleCancelAppointment(appointment.id)}
-                          >
-                            Cancelar
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenReschedule(appointment)}
+                            >
+                              <Edit className="mr-1 h-3 w-3" />
+                              Reagendar
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleCancelAppointment(appointment.id)}
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -256,6 +413,76 @@ const MeusAgendamentos = () => {
       </main>
 
       <Footer />
+
+      {/* Dialog de Reagendamento */}
+      <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Reagendar Procedimento</DialogTitle>
+            <DialogDescription>
+              Selecione a nova data e horário para o procedimento: <strong>{selectedAppointment?.service}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nova Data</label>
+              <CalendarComponent
+                mode="single"
+                selected={newDate}
+                onSelect={setNewDate}
+                disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 1}
+                className="rounded-md border"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Novo Horário</label>
+              <Select value={newTime} onValueChange={setNewTime}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o horário" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableHours.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      Nenhum horário disponível
+                    </SelectItem>
+                  ) : (
+                    availableHours.map((hour) => (
+                      <SelectItem key={hour} value={hour}>
+                        {hour}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setRescheduleDialogOpen(false)}
+              disabled={rescheduling}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmReschedule}
+              disabled={!newDate || !newTime || rescheduling}
+            >
+              {rescheduling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Reagendando...
+                </>
+              ) : (
+                "Confirmar Reagendamento"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
