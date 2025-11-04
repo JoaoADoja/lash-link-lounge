@@ -19,27 +19,46 @@ const Index = () => {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+useEffect(() => {
+  const fetchServices = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("services").select("*");
 
-      if (!error && data) {
-        const servicesWithUrls = data.map((service) => {
-          if (service.image?.startsWith("data:image")) return service;
-          const { data: publicUrlData } = supabase.storage.from("service-images").getPublicUrl(service.image);
-          return { ...service, image: publicUrlData?.publicUrl || service.image };
-        });
-        setServices(servicesWithUrls);
-      }
+    if (error) {
+      console.error("Erro ao buscar serviços:", error.message);
+      setServices([]);
       setLoading(false);
-    };
-    fetchServices();
-  }, []);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const servicesWithUrls = data.map((service) => {
+        if (!service.image) return service;
+
+        if (service.image.startsWith("data:image")) {
+          return service;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("service-images")
+          .getPublicUrl(service.image);
+
+        return {
+          ...service,
+          image: publicUrlData?.publicUrl || service.image,
+        };
+      });
+
+      setServices(servicesWithUrls);
+    } else {
+      setServices([]);
+    }
+
+    setLoading(false);
+  };
+
+  fetchServices();
+}, []);
 
   const benefits = [
     {
