@@ -19,46 +19,45 @@ const Index = () => {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchServices = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from("services").select("*");
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from("services").select("*");
 
-    if (error) {
-      console.error("Erro ao buscar serviços:", error.message);
-      setServices([]);
+      if (error) {
+        console.error("Erro ao buscar serviços:", error.message);
+        setServices([]);
+        setLoading(false);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const servicesWithUrls = data.map((service) => {
+          const image = service.image_url;
+
+          if (!image) return service;
+
+          if (image.startsWith("data:image") || image.startsWith("http")) {
+            return { ...service, image };
+          }
+
+          const { data: publicUrlData } = supabase.storage
+            .from("service-images")
+            .getPublicUrl(image);
+
+          return { ...service, image: publicUrlData?.publicUrl || image };
+        });
+
+        setServices(servicesWithUrls);
+      } else {
+        setServices([]);
+      }
+
       setLoading(false);
-      return;
-    }
+    };
 
-    if (data && data.length > 0) {
-      const servicesWithUrls = data.map((service) => {
-        if (!service.image) return service;
-
-        if (service.image.startsWith("data:image")) {
-          return service;
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from("service-images")
-          .getPublicUrl(service.image);
-
-        return {
-          ...service,
-          image: publicUrlData?.publicUrl || service.image,
-        };
-      });
-
-      setServices(servicesWithUrls);
-    } else {
-      setServices([]);
-    }
-
-    setLoading(false);
-  };
-
-  fetchServices();
-}, []);
+    fetchServices();
+  }, []);
 
   const benefits = [
     {
