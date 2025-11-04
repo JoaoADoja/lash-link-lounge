@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -5,10 +6,6 @@ import { Sparkles, Clock, Award, Heart, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-eyebrows.jpg";
-import serviceDesign from "@/assets/service-design.jpg";
-import serviceLashes from "@/assets/service-lashes.jpg";
-import serviceMicro from "@/assets/service-micro.jpg";
-// ... (outros imports)
 import {
   Carousel,
   CarouselContent,
@@ -16,30 +13,54 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-
-// ... (o resto dos seus imports, como Navbar, Footer, etc.)
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const featuredServices = [
-    {
-      title: "Design de Sobrancelhas",
-      description: "Técnica que valoriza o formato do rosto e realça o olhar com harmonia",
-      price: "R$ 70",
-      image: serviceDesign,
-    },
-    {
-      title: "Lash Lifting",
-      description: "Curva e alonga os cílios naturais, destacando o olhar sem extensões.",
-      price: "R$ 160",
-      image: serviceLashes,
-    },
-    {
-      title: "Micropigmentação",
-      description: "Técnica realista com resultado duradouro",
-      price: "A partir de R$ 400",
-      image: serviceMicro,
-    },
-  ];
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from("services").select("*");
+
+      if (error) {
+        console.error("Erro ao buscar serviços:", error.message);
+        setServices([]);
+        setLoading(false);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const servicesWithUrls = data.map((service) => {
+          const image = service.image_url;
+
+          if (!image) return { ...service, image: "/placeholder.jpg" };
+
+          // Se for base64 ou link completo (http)
+          if (image.startsWith("data:image") || image.startsWith("http")) {
+            return { ...service, image };
+          }
+
+          // Se for apenas o nome do arquivo no bucket
+          const { data: publicUrlData } = supabase.storage
+            .from("service-images")
+            .getPublicUrl(image);
+
+          const publicUrl = publicUrlData?.publicUrl;
+          return { ...service, image: publicUrl || "/placeholder.jpg" };
+        });
+
+        setServices(servicesWithUrls);
+      } else {
+        setServices([]);
+      }
+
+      setLoading(false);
+    };
+
+    fetchServices();
+  }, []);
 
   const benefits = [
     {
@@ -59,7 +80,7 @@ const Index = () => {
     },
     {
       icon: Clock,
-      title: "Flexibilidade e agilidade seu tempo é valioso",
+      title: "Flexibilidade e agilidade, seu tempo é valioso",
       description: "Agendamento rápido e horários que respeitam e acolhem a sua rotina.",
     },
   ];
@@ -67,8 +88,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
-      
-      {/* Hero Section */}
+
       <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -111,161 +131,82 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Serviços em Destaque */}
       <section className="pt-16 md:pt-24 pb-8 md:pb-12">
-  <div className="container mx-auto px-4">
-    <div className="text-center mb-12">
-      <h2 className="text-3xl md:text-4xl font-bold mb-4">
-        Nossos serviços
-      </h2>
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-        Conheça todos os nossos procedimentos e agende o seu favorito
-      </p>
-    </div>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nossos serviços</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Conheça todos os nossos procedimentos e agende o seu favorito
+            </p>
+          </div>
 
-    {/* Carrossel Automático */}
-    <Carousel className="w-full max-w-6xl mx-auto">
-      <CarouselContent className="-ml-4">
-        {[
-  {
-    title: "Design de Sobrancelhas",
-    description: "Técnica que valoriza o formato do rosto e realça o olhar com harmonia",
-    price: "R$ 70",
-    image: serviceDesign,
-  },
-   {
-            title: "Design com Henna",
-            description: "Além do formato ideal, a henna colore e preenche e define as sobrancelhas.",
-            price: "R$ 80",
-            image: serviceDesign,
-          },
-          {
-            title: "Depilação na Linha",
-            description: "Remove os pelos desde a raiz com precisão e suavidade, garantindo contornos perfeitos e pele lisa.",
-            price: "A partir de R$ 40",
-            image: serviceDesign,
-          },
-          {
-            title: "Lash Lifting",
-            description: "Curva e alonga os cílios naturais, destacando o olhar sem extensões.",
-            price: "R$ 160",
-            image: serviceLashes,
-          },
-          {
-            title: "Brow Lamination",
-            description: "Alinha e modela os fios, deixando as sobrancelhas cheias e uniformes",
-            price: "R$ 160",
-            image: serviceDesign,
-          },
-          {
-            title: "Micropigmentação Blading Fio a Fio",
-            description: "Fios desenhados manualmente que imitam os naturais, com resultado leve e realista.",
-            price: "R$ 400",
-            image: serviceMicro,
-          },
-          {
-            title: "Micropigmentação Shadow",
-            description: "Efeito sombreado e esfumado que garante sobrancelhas definidas e duradouras.",
-            price: "R$ 450",
-            image: serviceMicro,
-          },
-          {
-            title: "Limpeza de Pele",
-            description: "Remove impurezas e renova a pele, deixando o rosto limpo e radiante.",
-            price: "R$ 120",
-            image: serviceDesign,
-          },
-          {
-            title: "Extensão de Cílios - Volume Brasileiro",
-            description: "Cílios delicados, com efeito natural e sofisticado",
-            price: "R$ 140",
-            image: serviceLashes,
-          },
-          {
-            title: "Extensão de Cílios - Volume Egípcio",
-            description: "Olhar marcante e sofisticado, com fios mais volumosos.",
-            price: "R$ 160",
-            image: serviceLashes,
-          },
-          {
-            title: "Extensão de Cílios - Volume Médio",
-            description: "Equilíbrio entre naturalidade e destaque, com volume suave.",
-            price: "R$ 160",
-            image: serviceLashes,
-          },
-  // ... outros serviços
-].map((service, index) => (
-  <CarouselItem
-    key={index}
-    className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
-  >
-    {/* Card alinhado */}
-    <Card className="flex flex-col h-[480px] overflow-hidden hover:shadow-glow transition-all duration-300 border-border group">
-      
-      {/* Imagem */}
-      <div className="h-64 overflow-hidden">
-        <img
-          src={service.image}
-          alt={service.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-      </div>
+          {loading ? (
+            <p className="text-center text-muted-foreground">Carregando serviços...</p>
+          ) : (
+            <Carousel className="w-full max-w-6xl mx-auto">
+              <CarouselContent className="-ml-4">
+                {services.slice(0, 10).map((service, index) => (
+                  <CarouselItem
+                    key={index}
+                    className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+                  >
+                    <Card className="flex flex-col h-[480px] overflow-hidden hover:shadow-glow transition-all duration-300 border-border group">
+                      <div className="h-64 overflow-hidden bg-muted/20 flex items-center justify-center">
+                        <img
+                          src={service.image}
+                          alt={service.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+                        />
+                      </div>
+                      <CardHeader className="flex-grow">
+                        <CardTitle className="min-h-[56px] flex items-center">
+                          {service.name}
+                        </CardTitle>
+                        <CardDescription className="min-h-[48px]">
+                          {service.category}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="mt-auto">
+                        <div className="flex justify-between items-center">
+                          <span className="text-2xl font-bold text-primary">
+                            R$ {service.price}
+                          </span>
+                          <Link to="/agendamento">
+                            <Button variant="default" size="sm">
+                              Agendar
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          )}
 
-      {/* Título + Descrição */}
-      <CardHeader className="flex-grow">
-        <CardTitle className="min-h-[56px] flex items-center">
-          {service.title}
-        </CardTitle>
-        <CardDescription className="min-h-[48px]">
-          {service.description}
-        </CardDescription>
-      </CardHeader>
-
-      {/* Preço + Botão */}
-      <CardContent className="mt-auto">
-        <div className="flex justify-between items-center">
-          <span className="text-2xl font-bold text-primary">
-            {service.price}
-          </span>
-          <Link to="/agendamento">
-            <Button variant="default" size="sm">
-              Agendar
-            </Button>
-          </Link>
+          <div className="text-center mt-8">
+            <Link to="/servicos">
+              <Button variant="outline" size="lg">
+                Ver todos os serviços
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
         </div>
-      </CardContent>
-    </Card>
-  </CarouselItem>
-))}
-      </CarouselContent>
+      </section>
 
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
-
-    <div className="text-center mt-8">
-      <Link to="/servicos">
-        <Button variant="outline" size="lg">
-          Ver todos os serviços
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
-      </Link>
-    </div>
-  </div>
-</section>
-
-      {/* Diferenciais */}
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Por que escolher a Cardoso?
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Por que escolher a Cardoso?</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Seu momento de beleza, transformado em uma experiência única.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
               <Card key={index} className="text-center hover:shadow-soft transition-all duration-300 border-border">
@@ -282,7 +223,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Final */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <Card className="bg-gradient-rose-gold shadow-glow border-0">
@@ -295,17 +235,25 @@ const Index = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/agendamento">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/10 text-white border-white/30 hover:bg-white/20">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto bg-white/10 text-white border-white/30 hover:bg-white/20"
+                  >
                     Agendar Agora
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <a
-                  href="https://wa.me/5511999999999"
+                  href="https://wa.me/5511977806048"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/10 text-white border-white/30 hover:bg-white/20">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto bg-white/10 text-white border-white/30 hover:bg-white/20"
+                  >
                     Falar no WhatsApp
                   </Button>
                 </a>
