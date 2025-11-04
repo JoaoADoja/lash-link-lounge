@@ -4,22 +4,33 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth();
+  const [user, setUser] = useState<any>(null);
   const [isProfessional, setIsProfessional] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      checkIfProfessional(user.id);
-    } else {
-      setIsProfessional(false);
-    }
-  }, [user]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkIfProfessional(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkIfProfessional(session.user.id);
+      } else {
+        setIsProfessional(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const checkIfProfessional = async (userId: string) => {
     const { data } = await supabase
