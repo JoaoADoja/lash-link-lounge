@@ -41,6 +41,12 @@ interface BlockedSlot {
   reason: string | null;
 }
 
+const allAvailableHours = [
+  "09:30", "10:00", "10:30", "11:00", "11:30",
+  "13:00", "13:30", "14:00", "14:30", "15:00", 
+  "15:30", "16:00", "16:30", "17:00", "17:30"
+];
+
 const AdminSettings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -514,21 +520,40 @@ const AdminSettings = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Input
-                      type="date"
-                      value={newBlockedSlot.blocked_date}
-                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_date: e.target.value })}
-                    />
-                    <Input
-                      type="time"
-                      value={newBlockedSlot.blocked_time}
-                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_time: e.target.value })}
-                    />
-                    <Input
-                      placeholder="Motivo (opcional)"
-                      value={newBlockedSlot.reason}
-                      onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, reason: e.target.value })}
-                    />
+                    <div>
+                      <Label>Data</Label>
+                      <Input
+                        type="date"
+                        value={newBlockedSlot.blocked_date}
+                        onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, blocked_date: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Horário</Label>
+                      <Select
+                        value={newBlockedSlot.blocked_time}
+                        onValueChange={(value) => setNewBlockedSlot({ ...newBlockedSlot, blocked_time: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o horário" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 bg-background">
+                          {allAvailableHours.map(hour => (
+                            <SelectItem key={hour} value={hour}>
+                              {hour}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Motivo (opcional)</Label>
+                      <Input
+                        placeholder="Ex: Compromisso pessoal"
+                        value={newBlockedSlot.reason}
+                        onChange={(e) => setNewBlockedSlot({ ...newBlockedSlot, reason: e.target.value })}
+                      />
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={addBlockedSlot}>Bloquear horário</Button>
