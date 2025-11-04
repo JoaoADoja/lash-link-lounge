@@ -95,7 +95,30 @@ const Auth = () => {
 
     try {
       emailSchema.parse(resetEmail);
-      const redirectUrl = `${window.location.origin}/reset-password`; // redireciona de volta para login após redefinição
+
+      // Verificar se o e-mail existe no sistema
+      const { data: checkData, error: checkError } = await supabase.functions.invoke(
+        'check-email-exists',
+        {
+          body: { email: resetEmail }
+        }
+      );
+
+      if (checkError) {
+        console.error('Error checking email:', checkError);
+        toast.error("Erro ao verificar e-mail. Tente novamente.");
+        setLoading(false);
+        return;
+      }
+
+      if (!checkData?.exists) {
+        toast.error("E-mail não encontrado. Verifique se digitou corretamente ou crie uma conta.");
+        setLoading(false);
+        return;
+      }
+
+      // E-mail existe, prosseguir com o envio
+      const redirectUrl = `${window.location.origin}/reset-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: redirectUrl,
       });
