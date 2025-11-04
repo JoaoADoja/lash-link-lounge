@@ -74,7 +74,7 @@ const Navbar = () => {
             
             <div className="flex items-center space-x-3">
               <a
-                href="https://www.instagram.com"
+                href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
