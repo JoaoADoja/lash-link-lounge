@@ -1,59 +1,124 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Clock, Sparkles, Loader2 } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import serviceDesign from "@/assets/service-design.jpg";
+import serviceLashes from "@/assets/service-lashes.jpg";
+import serviceMicro from "@/assets/service-micro.jpg";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-interface Service {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  duration: string;
-  category: string;
-  is_combo: boolean;
-  is_active: boolean;
-  image_url?: string | null;
-}
+const services = [
+  {
+    title: "Design de Sobrancelhas",
+    description: "Técnica que valoriza o formato do rosto e realça o olhar com harmonia.",
+    price: "R$ 70",
+    duration: "40 min",
+    image: serviceDesign,
+  },
+  {
+    title: "Design com Henna",
+    description: "Além do formato ideal, a henna colore, preenche e define as sobrancelhas.",
+    price: "R$ 80",
+    duration: "1h",
+    image: serviceDesign,
+  },
+  {
+    title: "Depilação na Linha",
+    description: "Remove os pelos desde a raiz com precisão e suavidade, garantindo contornos perfeitos e pele lisa.",
+    price: "A partir de R$ 40",
+    duration: "30 min",
+    image: serviceDesign,
+  },
+  {
+    title: "Lash Lifting",
+    description: "Curva e alonga os cílios naturais, destacando o olhar sem extensões.",
+    price: "R$ 160",
+    duration: "1h10min",
+    image: serviceLashes,
+  },
+  {
+    title: "Brow Lamination",
+    description: "Técnica que alinha os pelos, garantindo sobrancelhas naturalmente cheias, uniformes e penteadas.",
+    price: "R$ 160",
+    duration: "1h10min",
+    image: serviceDesign,
+  },
+  {
+    title: "Micropigmentação Blading Fio a Fio",
+    description: "Fios desenhados manualmente que imitam os naturais, com resultado leve e realista.",
+    price: "R$ 400",
+    duration: "2h",
+    image: serviceMicro,
+  },
+  {
+    title: "Micropigmentação Shadow",
+    description: "Efeito sombreado e esfumado que garante sobrancelhas definidas e duradouras.",
+    price: "R$ 450",
+    duration: "2h",
+    image: serviceMicro,
+  },
+  {
+    title: "Limpeza de Pele",
+    description: "Remove impurezas e renova a pele, deixando o rosto limpo e radiante.",
+    price: "R$ 120",
+    duration: "1h20min",
+    image: serviceDesign,
+  },
+  {
+    title: "Extensão de Cílios - Volume Brasileiro",
+    description: "Cílios delicados, com efeito natural e sofisticado",
+    price: "R$ 140",
+    duration: "2h30min",
+    image: serviceLashes,
+  },
+  {
+    title: "Extensão de Cílios - Volume Egípcio",
+    description: "Olhar marcante e sofisticado, com fios mais volumosos.",
+    price: "R$ 160",
+    duration: "2h30min",
+    image: serviceLashes,
+  },
+  {
+    title: "Extensão de Cílios - Volume Médio",
+    description: "Equilíbrio entre naturalidade e destaque, com volume suave.",
+    price: "R$ 160",
+    duration: "2h30min",
+    image: serviceLashes,
+  },
+];
+
+const combos = [
+  {
+    title: "Combo Realce",
+    description: "Design + Buço",
+    price: "R$ 80",
+    duration: "1h",
+  },
+  {
+    title: "Combo Elegância",
+    description: "Design com Henna + Buço",
+    price: "R$ 100",
+    duration: "1h20min",
+  },
+  {
+    title: "Combo Glamour",
+    description: "Design + Lash Lifting",
+    price: "R$ 180",
+    duration: "2h",
+  },
+  {
+    title: "Combo Premium",
+    description: "Lash Lifting + Brow Lamination",
+    price: "R$ 280",
+    duration: "2h",
+  },
+];
 
 const Servicos = () => {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadServices();
-  }, []);
-
-  const loadServices = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order");
-
-      if (error) throw error;
-      setServices(data || []);
-    } catch (error) {
-      console.error("Erro ao carregar serviços:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const regularServices = services.filter(s => !s.is_combo);
-  const combos = services.filter(s => s.is_combo);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
@@ -71,35 +136,31 @@ const Servicos = () => {
 
         {/* Serviços Principais */}
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-  {regularServices.map((service) => (
+  {services.map((service, index) => (
     <Card
-      key={service.id}
+      key={index}
       className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
     >
       {/* Imagem */}
-      {service.image_url && (
-        <div className="h-48 w-full overflow-hidden">
-          <img
-            src={service.image_url}
-            alt={service.name}
-            className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-      )}
+      <div className="h-48 w-full overflow-hidden">
+        <img
+          src={service.image}
+          alt={service.title}
+          className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+        />
+      </div>
 
       {/* Conteúdo */}
       <div className="flex flex-col flex-grow p-4 text-center">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
-          {service.name}
+          {service.title}
         </h3>
-        {service.description && (
-          <p className="text-sm text-gray-600 flex-grow">
-            {service.description}
-          </p>
-        )}
+        <p className="text-sm text-gray-600 flex-grow">
+          {service.description}
+        </p>
 
         <div className="mt-4">
-          <p className="text-pink-600 font-bold mb-2">R$ {service.price.toFixed(2)}</p>
+          <p className="text-pink-600 font-bold mb-2">{service.price}</p>
           <Link to="/agendamento">
             <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-4 rounded-md">
               Agendar Agora
@@ -112,41 +173,42 @@ const Servicos = () => {
 </div>
 
         {/* Combos */}
-        {combos.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {combos.map((combo) => (
-              <Card
-                key={combo.id}
-                className="flex flex-col justify-between h-full border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card"
-              >
-                {/* Cabeçalho */}
-                <CardHeader className="flex-grow">
-                  <CardTitle className="text-lg text-center">{combo.name}</CardTitle>
-                  {combo.description && (
-                    <CardDescription className="text-center">{combo.description}</CardDescription>
-                  )}
-                </CardHeader>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  {combos.map((combo, index) => (
+    <Card
+      key={index}
+      className="flex flex-col justify-between h-full border-2 border-secondary/20 hover:shadow-gold transition-all duration-300 bg-card"
+    >
+      {/* Cabeçalho */}
+      <CardHeader className="flex-grow">
+        <CardTitle className="text-lg text-center">{combo.title}</CardTitle>
+        <CardDescription className="text-center">{combo.description}</CardDescription>
+      </CardHeader>
 
-                {/* Conteúdo */}
-                <CardContent className="flex flex-col justify-end flex-grow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2 text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-sm">{combo.duration}</span>
-                    </div>
-                    <div className="text-xl font-bold text-secondary">R$ {combo.price.toFixed(2)}</div>
-                  </div>
-
-                  <Link to="/agendamento">
-                    <Button variant="gold" size="sm" className="w-full">
-                      Agendar Combo
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+      {/* Conteúdo */}
+      <CardContent className="flex flex-col justify-end flex-grow">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm">{combo.duration}</span>
           </div>
-        )}
+          <div className="text-xl font-bold text-secondary">{combo.price}</div>
+        </div>
+
+        <Link to="/agendamento">
+          <Button variant="gold" size="sm" className="w-full">
+            Agendar Combo
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
+        {/* Combos */}
+        <div className="mb-12">
+          {/* ... (código existente dos combos) ... */}
+        </div> {/* <-- FIM DOS COMBOS */}
 
       
 
