@@ -22,6 +22,7 @@ const Index = () => {
   useEffect(() => {
     const fetchServices = async () => {
       setLoading(true);
+
       const { data, error } = await supabase.from("services").select("*");
 
       if (error) {
@@ -31,31 +32,7 @@ const Index = () => {
         return;
       }
 
-      if (data && data.length > 0) {
-        const servicesWithUrls = data.map((service) => {
-          const image = service.image_url;
-
-          if (!image) return { ...service, image: "/placeholder.jpg" };
-
-          // Se for base64 ou link completo (http)
-          if (image.startsWith("data:image") || image.startsWith("http")) {
-            return { ...service, image };
-          }
-
-          // Se for apenas o nome do arquivo no bucket
-          const { data: publicUrlData } = supabase.storage
-            .from("service-images")
-            .getPublicUrl(image);
-
-          const publicUrl = publicUrlData?.publicUrl;
-          return { ...service, image: publicUrl || "/placeholder.jpg" };
-        });
-
-        setServices(servicesWithUrls);
-      } else {
-        setServices([]);
-      }
-
+      setServices(data || []);
       setLoading(false);
     };
 
@@ -153,7 +130,7 @@ const Index = () => {
                     <Card className="flex flex-col h-[480px] overflow-hidden hover:shadow-glow transition-all duration-300 border-border group">
                       <div className="h-64 overflow-hidden bg-muted/20 flex items-center justify-center">
                         <img
-                          src={service.image}
+                          src={service.image_url || "/placeholder.jpg"}
                           alt={service.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
