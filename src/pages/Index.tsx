@@ -28,10 +28,16 @@ const Index = () => {
         .eq("is_active", true)
         .order("display_order", { ascending: true });
 
-      if (!error && data) setServices(data);
+      if (!error && data) {
+        const servicesWithUrls = data.map((service) => {
+          if (service.image?.startsWith("data:image")) return service;
+          const { data: publicUrlData } = supabase.storage.from("service-images").getPublicUrl(service.image);
+          return { ...service, image: publicUrlData?.publicUrl || service.image };
+        });
+        setServices(servicesWithUrls);
+      }
       setLoading(false);
     };
-
     fetchServices();
   }, []);
 
@@ -118,49 +124,42 @@ const Index = () => {
           ) : (
             <Carousel className="w-full max-w-6xl mx-auto">
               <CarouselContent className="-ml-4">
-                {services.slice(0, 10).map((service, index) => {
-                  const imageSrc =
-                    service.image?.startsWith("data:image")
-                      ? service.image
-                      : service.image || "/placeholder.jpg";
-
-                  return (
-                    <CarouselItem
-                      key={index}
-                      className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
-                    >
-                      <Card className="flex flex-col h-[480px] overflow-hidden hover:shadow-glow transition-all duration-300 border-border group">
-                        <div className="h-64 overflow-hidden bg-muted/20 flex items-center justify-center">
-                          <img
-                            src={imageSrc}
-                            alt={service.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
+                {services.slice(0, 10).map((service, index) => (
+                  <CarouselItem
+                    key={index}
+                    className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+                  >
+                    <Card className="flex flex-col h-[480px] overflow-hidden hover:shadow-glow transition-all duration-300 border-border group">
+                      <div className="h-64 overflow-hidden bg-muted/20 flex items-center justify-center">
+                        <img
+                          src={service.image || "/placeholder.jpg"}
+                          alt={service.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <CardHeader className="flex-grow">
+                        <CardTitle className="min-h-[56px] flex items-center">
+                          {service.name}
+                        </CardTitle>
+                        <CardDescription className="min-h-[48px]">
+                          {service.category}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="mt-auto">
+                        <div className="flex justify-between items-center">
+                          <span className="text-2xl font-bold text-primary">
+                            R$ {service.price}
+                          </span>
+                          <Link to="/agendamento">
+                            <Button variant="default" size="sm">
+                              Agendar
+                            </Button>
+                          </Link>
                         </div>
-                        <CardHeader className="flex-grow">
-                          <CardTitle className="min-h-[56px] flex items-center">
-                            {service.name}
-                          </CardTitle>
-                          <CardDescription className="min-h-[48px]">
-                            {service.category}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="mt-auto">
-                          <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold text-primary">
-                              R$ {service.price}
-                            </span>
-                            <Link to="/agendamento">
-                              <Button variant="default" size="sm">
-                                Agendar
-                              </Button>
-                            </Link>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />
