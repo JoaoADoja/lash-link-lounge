@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Service {
   id: string;
@@ -38,7 +39,7 @@ const phoneSchema = z.string().trim().min(10, "Telefone inválido").max(20);
 
 const Agendamento = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,23 +55,13 @@ const Agendamento = () => {
 
   useEffect(() => {
     loadServices();
-    
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session.user.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadUserProfile(user.id);
+    }
+  }, [user]);
 
   const loadServices = async () => {
     try {
