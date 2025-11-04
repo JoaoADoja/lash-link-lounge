@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 const emailSchema = z.string().email("E-mail inválido").max(255);
 const passwordSchema = z.string().min(6, "A senha deve ter no mínimo 6 caracteres");
@@ -17,22 +18,17 @@ const phoneSchema = z.string().trim().min(10, "Telefone inválido").max(20);
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [showReset, setShowReset] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) navigate("/");
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) navigate("/");
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
