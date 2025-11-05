@@ -105,7 +105,7 @@ const Agendamento = () => {
     }
   };
 
- const loadAvailableHours = async (selectedDate: Date) => {
+  const loadAvailableHours = async (selectedDate: Date) => {
   if (!selectedDate) {
     setAvailableHours(allAvailableHours);
     return;
@@ -122,6 +122,14 @@ const Agendamento = () => {
       .eq("status", "confirmed");
 
     if (error) throw error;
+
+    // 🔹 Buscar horários bloqueados pelo admin
+    const { data: blockedSlots, error: blockedError } = await supabase
+      .from("blocked_slots")
+      .select("blocked_time")
+      .eq("blocked_date", dateStr);
+
+    if (blockedError) throw blockedError;
 
     // 🔹 Carrega a duração de cada serviço (em minutos)
     const { data: services } = await supabase
@@ -141,6 +149,11 @@ const Agendamento = () => {
 
       const occupiedSlots = getTimeSlots(startTime, duration);
       blockedTimes.push(...occupiedSlots);
+    });
+
+    // 🔹 Adicionar horários bloqueados pelo admin
+    blockedSlots?.forEach((slot) => {
+      blockedTimes.push(slot.blocked_time);
     });
 
     // 🔹 Filtra os horários disponíveis
