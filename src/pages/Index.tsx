@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Sparkles, Clock, Award, Heart, ArrowRight } from "lucide-react";
+import { Sparkles, Clock, Award, Heart, ArrowRight, Info } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-eyebrows.jpg";
@@ -13,30 +13,48 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [services, setServices] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchData = async () => {
       setLoading(true);
 
-      const { data, error } = await supabase.from("services").select("*");
+      // Buscar serviços
+      const { data: servicesData, error: servicesError } = await supabase
+        .from("services")
+        .select("*");
 
-      if (error) {
-        console.error("Erro ao buscar serviços:", error.message);
+      if (servicesError) {
+        console.error("Erro ao buscar serviços:", servicesError.message);
         setServices([]);
-        setLoading(false);
-        return;
+      } else {
+        setServices(servicesData || []);
       }
 
-      setServices(data || []);
+      // Buscar avisos ativos
+      const { data: announcementsData, error: announcementsError } = await supabase
+        .from("announcements")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (announcementsError) {
+        console.error("Erro ao buscar avisos:", announcementsError.message);
+        setAnnouncements([]);
+      } else {
+        setAnnouncements(announcementsData || []);
+      }
+
       setLoading(false);
     };
 
-    fetchServices();
+    fetchData();
   }, []);
 
   const benefits = [
@@ -107,6 +125,26 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {announcements.length > 0 && (
+        <section className="py-8 md:py-12 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto space-y-4">
+              {announcements.map((announcement) => (
+                <Alert key={announcement.id} className="border-primary/20 bg-primary/5">
+                  <Info className="h-5 w-5 text-primary" />
+                  <AlertTitle className="text-lg font-semibold text-primary">
+                    {announcement.title}
+                  </AlertTitle>
+                  <AlertDescription className="text-foreground/80">
+                    {announcement.content}
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="pt-16 md:pt-24 pb-8 md:pb-12">
         <div className="container mx-auto px-4">
