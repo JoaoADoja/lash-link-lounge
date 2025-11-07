@@ -78,13 +78,13 @@ const Servicos = () => {
     >
       {/* Imagem */}
       {service.image_url && (
-       <div className="h-48 w-full flex items-center justify-center bg-white rounded-t-lg overflow-hidden">
-  <img
-    src={service.image_url}
-    alt={service.name}
-    className="object-contain w-full h-full transition-transform duration-300 hover:scale-105"
-  />
-</div>
+  <div className="h-56 w-full overflow-hidden rounded-t-lg">
+    <img
+      src={service.image_url}
+      alt={service.name}
+      className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+    />
+  </div>
       )}
 
       {/* Conteúdo */}
