@@ -78,11 +78,11 @@ const Servicos = () => {
     >
       {/* Imagem */}
       {service.image_url && (
-  <div className="w-full overflow-hidden rounded-t-lg">
+  <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-lg bg-gray-100">
     <img
       src={service.image_url}
       alt={service.name}
-      className="w-full h-56 object-cover transition-transform duration-300 hover:scale-105"
+      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
     />
   </div>
       )}
