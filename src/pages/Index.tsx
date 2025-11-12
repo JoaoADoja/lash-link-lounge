@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Sparkles, Clock, Award, Heart, ArrowRight, Info } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import heroImage from "@/assets/hero-eyebrows.jpg";
+import heroImage from "@/assets/hero-inicial.jpg";
 import {
   Carousel,
   CarouselContent,
@@ -112,11 +112,11 @@ const Index = () => {
               </div>
             </div>
             <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-glow">
+              <div className="relative rounded-2xl overflow-hidden shadow-glow aspect-[3/4]">
                 <img
                   src={heroImage}
-                  alt="Cardoso Sobrancelhas - Design de Sobrancelhas"
-                  className="w-full h-auto"
+                  alt="Cardoso Sobrancelhas - Profissional especializada em design de sobrancelhas"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-gradient-rose-gold rounded-full blur-3xl opacity-50"></div>
