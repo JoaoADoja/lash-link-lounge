@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Sparkles, Clock, Award, Heart, ArrowRight, Info } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import heroImage from "@/assets/hero-cardoso.jpg";
+import heroImage from "@/assets/hero-inicial.jpg";
 import {
   Carousel,
   CarouselContent,
